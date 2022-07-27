@@ -1,7 +1,8 @@
 /*************************************************/
 /**          Bin CHENG - 2022                   **/
 /**         AIYAGARI MODEL - EGM METHOD         **/
-/**                    2022                     **/
+/**                    2022      
+/**     Original ContributorL Alexandre GAILLARD **/               
 /*************************************************/
 
 
@@ -282,6 +283,7 @@ void bascule(double *VectorIN, double *VectorOUT, int dim)
     int i;
     for(i=0; i<dim; i++){VectorOUT[i]=VectorIN[i];}
 }
+
 
 
 // MAIN //
