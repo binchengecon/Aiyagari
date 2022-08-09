@@ -19,6 +19,9 @@
 #include <fstream>
 #include <iostream>
 #include <direct.h>
+#include <iomanip>
+#include <cmath>
+#include <limits>
 
 #if OMP == 1
 #include <omp.h>

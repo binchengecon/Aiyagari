@@ -29,9 +29,10 @@ int main()
     printf("PRODUCTIVITY SHOCKS\n");
     for (int y = 0; y < maxygrid; y++)
     {
+        printf("%f\t", prod[y]);
         prod[y] = exp(prod[y]);
         Labor += yinv[y] * prod[y];
-        printf("%f\t", prod[y]);
+        // printf("%f\t", prod[y]);
     }
     printf("\n");
     printf("\n");
