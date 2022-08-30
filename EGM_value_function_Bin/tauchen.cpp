@@ -69,7 +69,7 @@ void tauchenfun(double rho, double m, double amu, double sigma, double grid[Node
 	//Compute stddev of yt
 	
 	double stdyt= sqrt(varyt);
-	
+	// std::cout << "value of std_e="<<stdyt <<"\n";
 	//Define maximum and minimum grid point
 	
 	double ynodes[Nodes];
