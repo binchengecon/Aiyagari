@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <sys/time.h>
+// #include <sys/time.h>
 #include <assert.h>
 #include <cstring>
 #include <fstream>
@@ -24,14 +24,14 @@ const int size_j = 1000;
 const double kmin = 0.0;
 const double kmax = 500.0;
 
-const double betapar = 0.96;
+const double betapar = 0.9;
 const double alphapar = 0.36;
 const double deltapar = 0.08;
 const double rhopar = 3.0;
 const double labor = 1.0219882;
 
 const double epsV = 1.0e-8;
-const double epsdist = 1.0e-10;
+const double epsdist = 1.0e-7;
 const double epsK = 1.0e-6;
 const double relaxsK = 0.005;
 
@@ -50,9 +50,9 @@ const double strans[7][7] = {
     {0.001539, 0.024700, 0.152924, 0.361483, 0.328567, 0.114742, 0.016044},
     {0.000778, 0.015266, 0.114742, 0.328567, 0.361483, 0.152924, 0.026240}};
 
-const double pi = 0.05;
+const double pi = 0.01;
 
-const double r_f = 0.04;
+const double r_f = 0.02;
 
 // Function Definitions:
 
@@ -106,11 +106,11 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
 {
 
     // INITIALIZATION //
-    double *Kendo, *VFnew, *Kendo_min, tempnext, dtempnext, *eVF, *deVF, critV, vfweight, slope1, slope2, tempvf, *consendo, *VFendo, *cohendo, cohexo, *VFold_final;
+    double *Kendo, *VFnew, *Kendo_min, tempnext, dtempnext, *eVF, *deVF, critV, vfweight, slope1, slope2, tempvf, *consendo, *VFendo, *cohendo, cohexo, *VF_final_old;
     VFendo = (double *)calloc((ifulldim), sizeof(double)); // Value function on the next time grid, next iteration
     VFnew = (double *)calloc((ifulldim), sizeof(double));  // Value function on the next time grid, next iteration
 
-    VFold_final = (double *)calloc((iydim), sizeof(double)); // Value function on the next time grid, next iteration
+    VF_final_old = (double *)calloc((iydim), sizeof(double)); // Value function on the next time grid, next iteration
     // Kendo = (double *)calloc((ifulldim), sizeof(double));  // endogenous grid values
     // Kendo_min = (double *)calloc((maxygrid), sizeof(double)); // endogenous grid values
     // eVF = (double *)calloc((ifulldim), sizeof(double));       // expected value function
@@ -134,11 +134,10 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
         null(cohendo, ifulldim);
         null(VFendo, ifulldim);
 
-        copy(VF_final, VFold_final, iydim);
+        copy(VF_final, VF_final_old, iydim);
 
         // std::cout << std::setprecision(16) << VF[inx(5, 5)] << "\n";
         // std::cout << std::setprecision(16) << VFnew[inx(5, 5)] << "\n";
-        std::cout << critV << "\n";
 
         // main EGM computation
         for (i = 0; i < size_k; i++)
@@ -223,12 +222,28 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
         {
             for (y = 0; y < size_y; y++)
             {
-                int itemp = 0;
-                double temp = 0;
+
+                double temp;
+                int itemp;
+
                 for (j = 0; j < size_j; j++)
                 {
-                    if (temp < VF[inx(i, y, j)])
+                    tempnext = 0.0;
+                    for (ynext = 0; ynext < size_y; ynext++)
                     {
+                        tempnext += strans[y][ynext] * VF[inx(i, ynext, j)];
+                    }
+
+                    // std::cout << tempnext << "\n";
+                    if (j == 0)
+                    {
+                        temp = tempnext;
+                        itemp = 0;
+                    }
+
+                    if (tempnext > temp)
+                    {
+                        temp = tempnext;
                         itemp = j;
                     }
                 }
@@ -237,6 +252,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                 save_final[inx2(i, y)] = save[inx(i, y, itemp)];
             }
         }
+
         // std::cout << std::setprecision(16) << VF[inx(5, 5)] << "\n";
 
         // computing new derivatives and convergence
@@ -252,7 +268,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                     dVF_final[inx2(i - 1, y)] = nderiv(VF_final[inx2(i - 2, y)], VF_final[inx2(i - 1, y)], VF_final[inx2(i, y)], K[i - 2], K[i - 1], K[i]);
                 }
 
-                critV = max(critV, abs(VF_final[inx2(i, y)] - VFold_final[inx2(i, y)]));
+                critV = max(critV, abs(VF_final[inx2(i, y)] - VF_final_old[inx2(i, y)]));
 
                 // left corner
                 dVF_final[inx2(0, y)] = (VF_final[inx2(1, y)] - VF_final[inx2(0, y)]) / (K[1] - K[0]);
@@ -270,18 +286,20 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
 
                     if (i >= 2)
                     {
-                        dVF[inx(i - 1, y, j)] = nderiv(VF[inx(i - 2, y, j)], VF[inx(i - 1, y, j)], VF[inx(i, y, j)], K[i - 2], K[i - 1], K[i]);
+                        dVF[inx(i - 1, y, j)] = nderiv(VF_final[inx2(i - 2, y)], VF_final[inx2(i - 1, y)], VF_final[inx2(i, y)], K[i - 2], K[i - 1], K[i]);
                     }
 
                     // left corner
-                    dVF[inx(0, y, j)] = (VF[inx(1, y, j)] - VF[inx(0, y, j)]) / (K[1] - K[0]);
+                    dVF[inx(0, y, j)] = (VF_final[inx2(1, y)] - VF_final[inx2(0, y)]) / (K[1] - K[0]);
                     // right corner
-                    dVF[inx(size_k - 1, y, j)] = (VF[inx(size_k - 1, y, j)] - VF[inx(size_k - 2, y, j)]) / (K[size_k - 1] - K[size_k - 2]);
+                    dVF[inx(size_k - 1, y, j)] = (VF_final[inx2(size_k - 1, y)] - VF_final[inx2(size_k - 2, y)]) / (K[size_k - 1] - K[size_k - 2]);
                 }
             }
         }
 
         iter++;
+
+        std::cout << critV << "\n";
     }
 }
 
@@ -292,16 +310,17 @@ void SIMULATION(double *save, double *dist, double *capitalout, double K[size_k]
     distold = (double *)calloc((iydim), sizeof(double));
     null(distold, iydim);
 
-    int isave, i, y, ynext;
+    int isave, i, y, ynext, iter;
 
     critdist = 1.0;
-
-    while (critdist > epsdist)
+    iter = 0;
+    save[inx2(0, 0)] = 0.001;
+    while (critdist > epsdist && iter < 10000)
     {
         copy(dist, distold, iydim);
         null(dist, iydim);
 
-        std::cout << critdist << "\n";
+        // std::cout << critdist << "\n";
 
         // distribution dynamics
         for (i = 0; i < size_k; i++)
@@ -314,6 +333,7 @@ void SIMULATION(double *save, double *dist, double *capitalout, double K[size_k]
 
                     isave = min((int)(floor(getgrid(save[inx2(i, y)]))), size_k - 2);
                     weight = (save[inx2(i, y)] - K[isave]) / (K[isave + 1] - K[isave]);
+                    // std::cout << "weight=" << weight << "\n";
 
                     for (ynext = 0; ynext < size_y; ynext++)
                     {
@@ -337,7 +357,9 @@ void SIMULATION(double *save, double *dist, double *capitalout, double K[size_k]
             }
         }
 
-        // std::cout << critdist << "\n";
+        iter++;
+        std::cout << "iteration time=" << iter << ", critdist=" << critdist << "\n";
+        std::cout << "distverify=" << distverif << "\n";
     }
 
     *capitalout = 0.0;
@@ -392,12 +414,12 @@ int main()
     for (j = 0; j < size_j; j++)
     {
         Omega[j] = getomega(j);
-        std::cout << Omega[j] << "\n";
+        // std::cout << Omega[j] << "\n";
     }
 
     rrate = 0.040237086402090;
-    wagerate = 0.03;
-    distin_final[0] = 1.0;
+    wagerate = 0.3;
+    distin_final[1460] = 1.0;
     // taxL=0.3
 
     // initializing value function and initial derivatives
@@ -440,7 +462,7 @@ int main()
     }
 
     POLICY(VF_final, dVF_final, save_final, VF, dVF, save, K, Omega, wagerate);
-
+    printf("Policy Computation Done");
     // SIMULATION(save_final, distin_final, &capital1, K);
 
     // for (i = 0; i < size_k; i++)
@@ -455,8 +477,11 @@ int main()
     //     std::cout << "\n";
     // }
 
+    CreateFolder(".\\csv\\");
+    CreateFolder(".\\figure\\");
+
     // std::ofstream dfilecsv;
-    // dfilecsv.open("csv\\dist.csv");
+    // dfilecsv.open("csv\\dist4.csv");
     // dfilecsv << "gridnumber,"
     //          << "capital,"
     //          << "dist[0],"
@@ -465,7 +490,7 @@ int main()
     //          << "dist[3],"
     //          << "dist[4],"
     //          << "dist[5],"
-    //          << "dist[6],\n";
+    //          << "dist[6]\n";
     // for (i = 0; i < size_k; i++)
     // {
     //     dfilecsv << i << "," << getlevel(i) << ",";
@@ -473,18 +498,24 @@ int main()
     //     //  fprintf(dfilecsv, "%5d\t,%20.15f\t,", i, phi(i));
     //     for (y = 0; y < size_y; y++)
     //     { // fprintf(dfilecsv, "%20.15f,", VF[inx(i, y)]);
-    //         dfilecsv << distin_final[inx2(i, y)] << ",";
+    //         if (y < size_y - 1)
+    //         {
+    //             dfilecsv << distin_final[inx2(i, y)] << ",";
+    //         }
+
+    //         if (y == size_y - 1)
+    //         {
+    //             dfilecsv << distin_final[inx2(i, y)];
+    //         }
     //     }
+
     //     dfilecsv << "\n";
     // }
 
     // dfilecsv.close();
 
-    CreateFolder(".\\csv\\");
-    CreateFolder(".\\figure\\");
-
     std::ofstream policyfilecsv;
-    policyfilecsv.open("csv\\policy.csv");
+    policyfilecsv.open("csv\\policy4.csv");
     policyfilecsv << "gridnumber,"
                   << "capital,"
                   << "policy[0],"
@@ -517,7 +548,7 @@ int main()
     policyfilecsv.close();
 
     std::ofstream VFfilecsv;
-    VFfilecsv.open("csv\\VF.csv");
+    VFfilecsv.open("csv\\VF4.csv");
     VFfilecsv << "gridnumber,"
               << "capital,"
               << "VF[0],"

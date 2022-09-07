@@ -33,7 +33,7 @@ const double labor = 1.0219882;
 const double epsV = 1.0e-8;
 const double epsdist = 1.0e-10;
 const double epsK = 1.0e-6;
-const double relaxsK = 0.005;
+const double relaxsK = 0.01;
 
 // grid constants
 const double scale1 = 1.6;
@@ -50,9 +50,9 @@ const double strans[7][7] = {
     {0.001539, 0.024700, 0.152924, 0.361483, 0.328567, 0.114742, 0.016044},
     {0.000778, 0.015266, 0.114742, 0.328567, 0.361483, 0.152924, 0.026240}};
 
-const double pi = 0.05;
+const double pi = 0.1;
 
-const double r_f = 0.04;
+const double r_f = 0.02;
 
 // Function Definitions:
 
@@ -129,7 +129,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
     while (critV > epsV)
     {
         // we need copy to make a separate object
-        copy(VF, VFnew, ifulldim);
+        // copy(VF, VFnew, ifulldim);
 
         null(cohendo, ifulldim);
         null(VFendo, ifulldim);
@@ -156,8 +156,8 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
 
                     for (ynext = 0; ynext < size_y; ynext++)
                     {
-                        tempnext += strans[y][ynext] * VF[inx(i, ynext, j)];
-                        dtempnext += strans[y][ynext] * dVF[inx(i, ynext, j)];
+                        tempnext += strans[y][ynext] * VF_final[inx2(i, ynext)];
+                        dtempnext += strans[y][ynext] * dVF_final[inx2(i, ynext)];
                     }
 
                     cohendo[inx(i, y, j)] = K[i] + inv_MU(betapar * dtempnext);
@@ -261,25 +261,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
             }
         }
 
-        for (j = 0; j < size_j; j++)
-        {
-            for (y = 0; y < size_y; y++)
-            {
-                for (i = 0; i < size_k; i++)
-                {
 
-                    if (i >= 2)
-                    {
-                        dVF[inx(i - 1, y, j)] = nderiv(VF[inx(i - 2, y, j)], VF[inx(i - 1, y, j)], VF[inx(i, y, j)], K[i - 2], K[i - 1], K[i]);
-                    }
-
-                    // left corner
-                    dVF[inx(0, y, j)] = (VF[inx(1, y, j)] - VF[inx(0, y, j)]) / (K[1] - K[0]);
-                    // right corner
-                    dVF[inx(size_k - 1, y, j)] = (VF[inx(size_k - 1, y, j)] - VF[inx(size_k - 2, y, j)]) / (K[size_k - 1] - K[size_k - 2]);
-                }
-            }
-        }
 
         iter++;
     }
@@ -392,7 +374,7 @@ int main()
     for (j = 0; j < size_j; j++)
     {
         Omega[j] = getomega(j);
-        std::cout << Omega[j] << "\n";
+        // std::cout << Omega[j] << "\n";
     }
 
     rrate = 0.040237086402090;
@@ -484,7 +466,7 @@ int main()
     CreateFolder(".\\figure\\");
 
     std::ofstream policyfilecsv;
-    policyfilecsv.open("csv\\policy.csv");
+    policyfilecsv.open("csv\\policy2.csv");
     policyfilecsv << "gridnumber,"
                   << "capital,"
                   << "policy[0],"
@@ -517,7 +499,7 @@ int main()
     policyfilecsv.close();
 
     std::ofstream VFfilecsv;
-    VFfilecsv.open("csv\\VF.csv");
+    VFfilecsv.open("csv\\VF2.csv");
     VFfilecsv << "gridnumber,"
               << "capital,"
               << "VF[0],"

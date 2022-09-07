@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <sys/time.h>
+// #include <sys/time.h>
 #include <assert.h>
 #include <cstring>
 #include <fstream>
@@ -14,7 +14,7 @@
 
 const int size_k = 500; // number of grid points
 const int size_y = 7;   // number of productivity classes
-const int size_j = 1000;
+const int size_j = 100;
 
 #define ifulldim (size_k * size_y * size_j)
 #define iydim (size_k * size_y)
@@ -52,7 +52,7 @@ const double strans[7][7] = {
 
 const double pi = 0.05;
 
-const double r_f = 0.04;
+const double r_f = 0.02;
 
 // Function Definitions:
 
@@ -106,11 +106,11 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
 {
 
     // INITIALIZATION //
-    double *Kendo, *VFnew, *Kendo_min, tempnext, dtempnext, *eVF, *deVF, critV, vfweight, slope1, slope2, tempvf, *consendo, *VFendo, *cohendo, cohexo, *VFold_final;
+    double *Kendo, *VFnew, *Kendo_min, tempnext, dtempnext, *eVF, *deVF, critV, vfweight, slope1, slope2, tempvf, *consendo, *VFendo, *cohendo, cohexo, *VF_final_old;
     VFendo = (double *)calloc((ifulldim), sizeof(double)); // Value function on the next time grid, next iteration
     VFnew = (double *)calloc((ifulldim), sizeof(double));  // Value function on the next time grid, next iteration
 
-    VFold_final = (double *)calloc((iydim), sizeof(double)); // Value function on the next time grid, next iteration
+    VF_final_old = (double *)calloc((iydim), sizeof(double)); // Value function on the next time grid, next iteration
     // Kendo = (double *)calloc((ifulldim), sizeof(double));  // endogenous grid values
     // Kendo_min = (double *)calloc((maxygrid), sizeof(double)); // endogenous grid values
     // eVF = (double *)calloc((ifulldim), sizeof(double));       // expected value function
@@ -134,11 +134,10 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
         null(cohendo, ifulldim);
         null(VFendo, ifulldim);
 
-        copy(VF_final, VFold_final, iydim);
+        copy(VF_final, VF_final_old, iydim);
 
         // std::cout << std::setprecision(16) << VF[inx(5, 5)] << "\n";
         // std::cout << std::setprecision(16) << VFnew[inx(5, 5)] << "\n";
-        std::cout << critV << "\n";
 
         // main EGM computation
         for (i = 0; i < size_k; i++)
@@ -223,12 +222,28 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
         {
             for (y = 0; y < size_y; y++)
             {
-                int itemp = 0;
-                double temp = 0;
+
+                double temp;
+                int itemp;
+
                 for (j = 0; j < size_j; j++)
                 {
-                    if (temp < VF[inx(i, y, j)])
+                    tempnext = 0.0;
+                    for (ynext = 0; ynext < size_y; ynext++)
                     {
+                        tempnext += strans[y][ynext] * VF[inx(i, ynext, j)];
+                    }
+
+                    // std::cout << tempnext << "\n";
+                    if (j == 0)
+                    {
+                        temp = tempnext;
+                        itemp = 0;
+                    }
+
+                    if (tempnext > temp)
+                    {
+                        temp = tempnext;
                         itemp = j;
                     }
                 }
@@ -237,6 +252,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                 save_final[inx2(i, y)] = save[inx(i, y, itemp)];
             }
         }
+
         // std::cout << std::setprecision(16) << VF[inx(5, 5)] << "\n";
 
         // computing new derivatives and convergence
@@ -252,7 +268,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                     dVF_final[inx2(i - 1, y)] = nderiv(VF_final[inx2(i - 2, y)], VF_final[inx2(i - 1, y)], VF_final[inx2(i, y)], K[i - 2], K[i - 1], K[i]);
                 }
 
-                critV = max(critV, abs(VF_final[inx2(i, y)] - VFold_final[inx2(i, y)]));
+                critV = max(critV, abs(VF_final[inx2(i, y)] - VF_final_old[inx2(i, y)]));
 
                 // left corner
                 dVF_final[inx2(0, y)] = (VF_final[inx2(1, y)] - VF_final[inx2(0, y)]) / (K[1] - K[0]);
@@ -270,18 +286,20 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
 
                     if (i >= 2)
                     {
-                        dVF[inx(i - 1, y, j)] = nderiv(VF[inx(i - 2, y, j)], VF[inx(i - 1, y, j)], VF[inx(i, y, j)], K[i - 2], K[i - 1], K[i]);
+                        dVF[inx(i - 1, y, j)] = nderiv(VF_final[inx2(i - 2, y)], VF_final[inx2(i - 1, y)], VF_final[inx2(i, y)], K[i - 2], K[i - 1], K[i]);
                     }
 
                     // left corner
-                    dVF[inx(0, y, j)] = (VF[inx(1, y, j)] - VF[inx(0, y, j)]) / (K[1] - K[0]);
+                    dVF[inx(0, y, j)] = (VF_final[inx2(1, y)] - VF_final[inx2(0, y)]) / (K[1] - K[0]);
                     // right corner
-                    dVF[inx(size_k - 1, y, j)] = (VF[inx(size_k - 1, y, j)] - VF[inx(size_k - 2, y, j)]) / (K[size_k - 1] - K[size_k - 2]);
+                    dVF[inx(size_k - 1, y, j)] = (VF_final[inx2(size_k - 1, y)] - VF_final[inx2(size_k - 2, y)]) / (K[size_k - 1] - K[size_k - 2]);
                 }
             }
         }
 
         iter++;
+
+        std::cout << critV << "\n";
     }
 }
 
@@ -392,7 +410,7 @@ int main()
     for (j = 0; j < size_j; j++)
     {
         Omega[j] = getomega(j);
-        std::cout << Omega[j] << "\n";
+        // std::cout << Omega[j] << "\n";
     }
 
     rrate = 0.040237086402090;

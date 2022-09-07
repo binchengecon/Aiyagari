@@ -1,15 +1,12 @@
 #include <windows.h>
 #include <stdio.h>
+#include <iostream>
 
-void CreateFolder(const char *path)
-{
-    if (!CreateDirectory(path, NULL))
-    {
-        return;
-    }
-}
+const int size_j = 100;
+#define getomega(x) ((x + 1.0) / (size_j))
+
 
 int main()
 {
-    CreateFolder(".\\result\\");
+    std::cout << getomega(5) << "\n";
 }

@@ -76,55 +76,6 @@ double strans[7][7] = {
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
-// double MUc(double x)
-// {
-//     return (pow((x), -rhopar));
-// }
-// double inv_MU(double u)
-// {
-
-//     return (pow((u), (-(1.0 / rhopar))));
-// }
-
-// double U(double x)
-// {
-//     return (pow((x), (1.0 - rhopar)) / (1.0 - rhopar));
-// }
-
-// double inter1d(double x1, double y1, double y2)
-// {
-//     return ((1.0 - (x1)) * (y1) + (x1) * (y2));
-// }
-
-// double getwage(double rrate)
-// {
-//     return (1.0 - alphapar) * pow((alphapar / (rrate + deltapar)), (alphapar / (1.0 - alphapar)));
-// }
-
-// double getlevel(double x)
-// {
-//     return (scale1 * (exp(exponen * (x)) + grmin));
-// }
-
-// double getgrid(double x)
-// {
-//     return (log((x) / scale1 - grmin) / exponen);
-// }
-
-// double nderiv(double val1, double val2, double val3, double x1, double x2, double x3)
-// {
-//     return ((1.0 - (x3 - x2) / (x3 - x1)) * ((val3 - val2) / (x3 - x2)) + ((x3 - x2) / (x3 - x1)) * ((val2 - val1) / (x2 - x1)));
-// }
-
-// double max(double a, double b)
-// {
-//     return (((a) > (b)) ? (a) : (b));
-// }
-
-// int min(int a, int b)
-// {
-//     return (((a) < (b)) ? (a) : (b));
-// }
 
 double K[size_k];
 
