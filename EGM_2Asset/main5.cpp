@@ -11,6 +11,8 @@
 #include <cmath>
 #include <limits>
 #include <windows.h>
+#include <string>
+#include <sstream>
 
 const int size_k = 500; // number of grid points
 const int size_y = 7;   // number of productivity classes
@@ -50,9 +52,9 @@ const double strans[7][7] = {
     {0.001539, 0.024700, 0.152924, 0.361483, 0.328567, 0.114742, 0.016044},
     {0.000778, 0.015266, 0.114742, 0.328567, 0.361483, 0.152924, 0.026240}};
 
-const double pi = 0.01;
+const double pi = 0.0005;
 
-const double r_f = 0.02;
+const double r_f = 0.06;
 
 // Function Definitions:
 
@@ -102,7 +104,7 @@ void null(double *VectorIN, int dim)
     }
 }
 
-void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF, double *dVF, double *save, double K[size_k], double Omega[size_j], double wagerate)
+void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF, double *dVF, double *save, double *Portfolio, double K[size_k], double Omega[size_j], double wagerate)
 {
 
     // INITIALIZATION //
@@ -250,6 +252,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
 
                 VF_final[inx2(i, y)] = VF[inx(i, y, itemp)];
                 save_final[inx2(i, y)] = save[inx(i, y, itemp)];
+                Portfolio[inx2(i, y)] = Omega[itemp];
             }
         }
 
@@ -376,7 +379,7 @@ void SIMULATION(double *save, double *dist, double *capitalout, double K[size_k]
 int main()
 {
     // MARGINAL UTILITY, VALUES FUNCTION AND POLICIES //
-    double *VF, *dVF, *save, *cons;                                            // for decision rules
+    double *VF, *dVF, *save, *cons, *Portfolio;                                // for decision rules
     double capital1, capital0, PIB, critprice, taxL, welfare, rrate, wagerate; // for equilibrium
 
     // Note for users :: please, always use pointers and save your computer's memory ;) == banish all arrays //
@@ -391,6 +394,7 @@ int main()
     dVF_final = (double *)calloc((iydim), sizeof(double)); // value function derivative
 
     save_final = (double *)calloc((iydim), sizeof(double));
+    Portfolio = (double *)calloc((iydim), sizeof(double));
     // cons = (double *)calloc((ifulldim), sizeof(double));
     distin_final = (double *)calloc((iydim), sizeof(double));
     distout_final = (double *)calloc((iydim), sizeof(double));
@@ -418,8 +422,8 @@ int main()
     }
 
     rrate = 0.040237086402090;
-    wagerate = 0.8;
-    distin_final[1460] = 1.0;
+    wagerate = 0.2;
+    distin_final[0] = 1.0;
     // taxL=0.3
 
     // initializing value function and initial derivatives
@@ -461,9 +465,9 @@ int main()
         }
     }
 
-    POLICY(VF_final, dVF_final, save_final, VF, dVF, save, K, Omega, wagerate);
+    POLICY(VF_final, dVF_final, save_final, VF, dVF, save, Portfolio, K, Omega, wagerate);
     printf("Policy Computation Done");
-    // SIMULATION(save_final, distin_final, &capital1, K);
+    SIMULATION(save_final, distin_final, &capital1, K);
 
     // for (i = 0; i < size_k; i++)
     // {
@@ -479,6 +483,9 @@ int main()
 
     CreateFolder(".\\csv\\");
     CreateFolder(".\\figure\\");
+
+    // std::string var = "sometext" + std::to_string(pi);
+    // std::cout << var;
 
     // std::ofstream dfilecsv;
     // dfilecsv.open("csv\\dist4.csv");
@@ -514,8 +521,10 @@ int main()
 
     // dfilecsv.close();
 
+    std::string var_policy = "csv\\policy,pi=" + std::to_string(pi) + ".csv";
+
     std::ofstream policyfilecsv;
-    policyfilecsv.open("csv\\policy5.csv");
+    policyfilecsv.open(var_policy);
     policyfilecsv << "gridnumber,"
                   << "capital,"
                   << "policy[0],"
@@ -546,9 +555,10 @@ int main()
     }
 
     policyfilecsv.close();
+    std::string var_VF = "csv\\VF,pi=" + std::to_string(pi) + ".csv";
 
     std::ofstream VFfilecsv;
-    VFfilecsv.open("csv\\VF5.csv");
+    VFfilecsv.open(var_VF);
     VFfilecsv << "gridnumber,"
               << "capital,"
               << "VF[0],"
@@ -579,4 +589,39 @@ int main()
     }
 
     VFfilecsv.close();
+
+    std::string var_port = "csv\\Portfolio,pi=" + std::to_string(pi) + ".csv";
+
+    std::ofstream Portfilecsv;
+    Portfilecsv.open(var_port);
+    Portfilecsv << "gridnumber,"
+                << "capital,"
+                << "Portfolio[0],"
+                << "Portfolio[1],"
+                << "Portfolio[2],"
+                << "Portfolio[3],"
+                << "Portfolio[4],"
+                << "Portfolio[5],"
+                << "Portfolio[6]\n";
+    for (i = 0; i < size_k; i++)
+    {
+        Portfilecsv << i << "," << getlevel(i) << ",";
+
+        //  fprintf(dfilecsv, "%5d\t,%20.15f\t,", i, phi(i));
+        for (y = 0; y < size_y; y++)
+        { // fprintf(dfilecsv, "%20.15f,", VF[inx(i, y)]);
+            if (y < size_y - 1)
+            {
+                Portfilecsv << Portfolio[inx2(i, y)] << ",";
+            }
+
+            if (y == size_y - 1)
+            {
+                Portfilecsv << Portfolio[inx2(i, y)];
+            }
+        }
+        Portfilecsv << "\n";
+    }
+
+    Portfilecsv.close();
 }
