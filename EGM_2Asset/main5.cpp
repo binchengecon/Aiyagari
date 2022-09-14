@@ -16,9 +16,9 @@
 
 const int size_k = 500; // number of grid points
 const int size_y = 7;   // number of productivity classes
-const int size_j = 100;
+const int size_j = 4000; // 1000, 4000 (stuck at 2.2e-004) not working
 
-#define ifulldim (size_k * size_y * size_j)
+#define ifulldim (size_k * size_y * (size_j+1))
 #define iydim (size_k * size_y)
 #define inx(igridindex, jclassindex, kclassindex) (((kclassindex) * (size_k * size_y)) + ((jclassindex) * (size_k)) + (igridindex))
 #define inx2(igridindex, jclassindex) (((jclassindex) * (size_k)) + (igridindex))
@@ -42,19 +42,31 @@ const double scale1 = 1.6;
 const double grmin = (kmin / scale1) - 1.0;
 const double exponen = log((kmax / scale1) - grmin) / (size_k - 1);
 
-const double sstates[7] = {-0.030619, -0.020412, -0.010206, 0.000000, 0.010206, 0.020412, 0.030619};
+// const double sstates[7] = {-0.030619, -0.020412, -0.010206, 0.000000, 0.010206, 0.020412, 0.030619};
+// const double strans[7][7] = {
+//     {0.026240, 0.152924, 0.361483, 0.328567, 0.114742, 0.015266, 0.000778},
+//     {0.016044, 0.114742, 0.328567, 0.361483, 0.152924, 0.024700, 0.001539},
+//     {0.009452, 0.082835, 0.287445, 0.382789, 0.196114, 0.038437, 0.002929},
+//     {0.005362, 0.057531, 0.242024, 0.390166, 0.242024, 0.057531, 0.005362},
+//     {0.002929, 0.038437, 0.196114, 0.382789, 0.287445, 0.082835, 0.009452},
+//     {0.001539, 0.024700, 0.152924, 0.361483, 0.328567, 0.114742, 0.016044},
+//     {0.000778, 0.015266, 0.114742, 0.328567, 0.361483, 0.152924, 0.026240}};
+
+
+const double sstates[7] = {-0.030000, -0.020000, -0.010000, 0.000000, 0.010000, 0.020000, 0.030000};
 const double strans[7][7] = {
-    {0.026240, 0.152924, 0.361483, 0.328567, 0.114742, 0.015266, 0.000778},
-    {0.016044, 0.114742, 0.328567, 0.361483, 0.152924, 0.024700, 0.001539},
-    {0.009452, 0.082835, 0.287445, 0.382789, 0.196114, 0.038437, 0.002929},
-    {0.005362, 0.057531, 0.242024, 0.390166, 0.242024, 0.057531, 0.005362},
-    {0.002929, 0.038437, 0.196114, 0.382789, 0.287445, 0.082835, 0.009452},
-    {0.001539, 0.024700, 0.152924, 0.361483, 0.328567, 0.114742, 0.016044},
-    {0.000778, 0.015266, 0.114742, 0.328567, 0.361483, 0.152924, 0.026240}};
+    {0.006262, 0.060934, 0.242398, 0.382924, 0.241063, 0.060262, 0.006157},
+    {0.006245, 0.060822, 0.242175, 0.382924, 0.241285, 0.060374, 0.006175},
+    {0.006227, 0.060710, 0.241953, 0.382925, 0.241508, 0.060486, 0.006192},
+    {0.006210, 0.060597, 0.241730, 0.382925, 0.241730, 0.060597, 0.006210},
+    {0.006192, 0.060486, 0.241508, 0.382925, 0.241953, 0.060710, 0.006227},
+    {0.006175, 0.060374, 0.241285, 0.382924, 0.242175, 0.060822, 0.006245},
+    {0.006157, 0.060262, 0.241063, 0.382924, 0.242398, 0.060934, 0.006262}};
 
-const double pi = 0.0005;
 
-const double r_f = 0.06;
+const double pi = 0.0000;
+
+const double r_f = 0.01;
 
 // Function Definitions:
 
@@ -67,7 +79,7 @@ const double r_f = 0.06;
 #define inter1d(x1, y1, y2) ((1.0 - (x1)) * (y1) + (x1) * (y2))
 #define getwage(rrate) (1.0 - alphapar) * pow((alphapar / (rrate + deltapar)), (alphapar / (1.0 - alphapar)));
 #define getlevel(x) (scale1 * (exp(exponen * (x)) + grmin))
-#define getomega(x) ((x + 1.0) / size_j)
+#define getomega(x) ((x + 0.0) / size_j)
 #define getgrid(x) (log((x) / scale1 - grmin) / exponen)
 
 // EGM derivatives
@@ -149,7 +161,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
 
                 // try omega here: omega index=j
 
-                for (j = 0; j < size_j; j++)
+                for (j = 0; j < size_j+1; j++)
                 {
 
                     tempnext = 0;
@@ -168,7 +180,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
         }
 
         // rescaling
-        for (j = 0; j < size_j; j++)
+        for (j = 0; j < size_j+1; j++)
         {
 
             for (y = 0; y < size_y; y++)
@@ -228,7 +240,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                 double temp;
                 int itemp;
 
-                for (j = 0; j < size_j; j++)
+                for (j = 0; j < size_j+1; j++)
                 {
                     tempnext = 0.0;
                     for (ynext = 0; ynext < size_y; ynext++)
@@ -280,7 +292,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
             }
         }
 
-        for (j = 0; j < size_j; j++)
+        for (j = 0; j < size_j+1; j++)
         {
             for (y = 0; y < size_y; y++)
             {
@@ -415,7 +427,7 @@ int main()
         K[i] = getlevel(i);
     }
 
-    for (j = 0; j < size_j; j++)
+    for (j = 0; j < size_j+1; j++)
     {
         Omega[j] = getomega(j);
         // std::cout << Omega[j] << "\n";
@@ -428,7 +440,7 @@ int main()
 
     // initializing value function and initial derivatives
 
-    for (j = 0; j < size_j; j++)
+    for (j = 0; j < size_j+1; j++)
     {
         for (i = 0; i < size_k; i++)
         {
@@ -467,7 +479,7 @@ int main()
 
     POLICY(VF_final, dVF_final, save_final, VF, dVF, save, Portfolio, K, Omega, wagerate);
     printf("Policy Computation Done");
-    SIMULATION(save_final, distin_final, &capital1, K);
+    // SIMULATION(save_final, distin_final, &capital1, K);
 
     // for (i = 0; i < size_k; i++)
     // {
@@ -590,7 +602,7 @@ int main()
 
     VFfilecsv.close();
 
-    std::string var_port = "csv\\Portfolio,pi=" + std::to_string(pi) + ".csv";
+    std::string var_port = "csv\\Portfolio,pi=" + std::to_string(pi) + ",Psize="+std::to_string(size_j)+".csv";
 
     std::ofstream Portfilecsv;
     Portfilecsv.open(var_port);
