@@ -500,30 +500,33 @@ int main()
 
     dfilecsv.close();
 
-    // std::ofstream policyfilecsv;
-    // policyfilecsv.open("csv\\policy_HRI.csv");
-    // policyfilecsv << "gridnumber,"
-    //               << "capital,"
-    //               << "policy[0],"
-    //               << "policy[1],"
-    //               << "policy[2],"
-    //               << "policy[3],"
-    //               << "policy[4],"
-    //               << "policy[5],"
-    //               << "policy[6],\n";
-    // for (i = 0; i < size_k; i++)
-    // {
-    //     policyfilecsv << i << "," << getlevel(i) << ",";
+    std::ofstream policyfilecsv;
+    policyfilecsv.open("csv\\policy_HRI.csv");
+    policyfilecsv << "gridnumber,"
+                  << "capital,"
+                  << "policy[0],"
+                  << "policy[1],"
+                  << "policy[2],"
+                  << "policy[3],"
+                  << "policy[4],"
+                  << "policy[5],"
+                  << "policy[6]\n";
+    for (i = 0; i < size_k; i++)
+    {
+        policyfilecsv << i << "," << getlevel(i) << ",";
 
-    //     //  fprintf(dfilecsv, "%5d\t,%20.15f\t,", i, phi(i));
-    //     for (y = 0; y < size_m; y++)
-    //     { // fprintf(dfilecsv, "%20.15f,", VF[inx(i, y)]);
-    //         policyfilecsv << save[inx(i, y)] << ",";
-    //     }
-    //     policyfilecsv << "\n";
-    // }
+        //  fprintf(dfilecsv, "%5d\t,%20.15f\t,", i, phi(i));
+        for (y = 0; y < size_m; y++)
+        { // fprintf(dfilecsv, "%20.15f,", VF[inx(i, y)]);
+            for (n = 0; n < size_n; n++)
+            {
+                policyfilecsv << save[inx(i, y, n)] << ",";
+            }
+        }
+        policyfilecsv << "\n";
+    }
 
-    // policyfilecsv.close();
+    policyfilecsv.close();
 
     std::ofstream VFfilecsv;
     VFfilecsv.open("csv\\VF_HRI.csv");

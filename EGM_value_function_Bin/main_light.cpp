@@ -284,6 +284,7 @@ int main()
 
     rrate = 0.040237086402090;
     wagerate = getwage(rrate);
+    std::cout << "wagerate=" << wagerate << "\n";
     distin[0] = 1.0;
     // taxL=0.3
 

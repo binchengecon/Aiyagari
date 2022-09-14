@@ -35,22 +35,40 @@ int main()
     //     // printf("%f\t", prod[y]);
     // }
     // printf("\n");
-    printf("\n");
-    printf("TRANSITION MATRIX FOR PRODUCTIVITY SHOCKS\n");
-    for (int y = 0; y < maxygrid; y++)
-    {
-        for (int k = 0; k < maxygrid; k++)
-        {
-            printf("%f\t", ytrans[y][k]);
-        }
-        printf("\n");
-    }
-    printf("\n");
+    // printf("\n");
+    // printf("TRANSITION MATRIX FOR PRODUCTIVITY SHOCKS\n");
+    // for (int y = 0; y < maxygrid; y++)
+    // {
+    //     for (int k = 0; k < maxygrid; k++)
+    //     {
+    //         printf("%f\t", ytrans[y][k]);
+    //     }
+    //     printf("\n");
+    // }
+    // printf("\n");
 
     printf("For Copy: PRODUCTIVITY SHOCKS\n");
     printf("For Copy: TRANSITION MATRIX FOR PRODUCTIVITY SHOCKS\n");
 
-    printf("const double nsstates[%d] ={", size_m);
+    // printf("const double nstates[%d] ={", size_m);
+    // for (int y = 0; y < maxygrid; y++)
+    // {
+    //     // printf("%f\t", prod[y]);
+    //     // prod[y] = exp(prod[y]);
+    //     Labor += yinv[y] * prod[y];
+
+    //     if (y < maxygrid - 1)
+    //     {
+    //         printf("exp(%f),\t", prod[y]);
+    //     }
+    //     else
+    //     {
+    //         printf("exp(%f)", prod[y]);
+    //     }
+    // }
+    // printf("};\n");
+
+    printf("const double risk_states[%d] ={", size_m);
     for (int y = 0; y < maxygrid; y++)
     {
         // printf("%f\t", prod[y]);
@@ -58,16 +76,16 @@ int main()
         Labor += yinv[y] * prod[y];
         if (y < maxygrid - 1)
         {
-            printf("exp(%f),\t", prod[y]);
+            printf("%f, ", prod[y]);
         }
         else
         {
-            printf("exp(%f)", prod[y]);
+            printf("%f", prod[y]);
         }
     }
     printf("};\n");
 
-    printf("const double nstrans[%d][%d] = {\n", size_m, size_m);
+    printf("const double risk_trans[%d][%d] = {\n", size_m, size_m);
     for (int y = 0; y < maxygrid; y++)
     {
         printf("{");
