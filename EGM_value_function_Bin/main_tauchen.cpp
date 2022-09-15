@@ -5,20 +5,25 @@
 #include <iostream>
 
 // INDEX //
-#define maxigrid 500 // define the grid of saving (next period wealth)
-#define maxygrid 7
+// #define maxigrid 500 // define the grid of saving (next period wealth)
+// #define maxygrid 7
 
 int main()
 {
     // TRANSITION + STATE Z OF ENTREPRENEURS //
 
     const int size_k = 500; // number of grid points
-    const int size_m = 7;   // number of productivity classes
 
-    const double p_e = 0.2;
-    const double std_e = 0.01;
+    const double p_e = 0.000001;
+    // const double std_e = 0.01;
+    const double std_e = 0.015;
 
-    const double m_e = 3;
+    // const double m_e = 3;
+    // const int m_e = 6;
+    const int m_e = 3;
+
+    const int maxygrid = 2*m_e+1;   // number of productivity classes
+    const int size_m = 2*m_e+1;   // number of productivity classes
 
     double prod[maxygrid], ytrans[maxygrid][maxygrid], yinv[maxygrid], Labor;
 
@@ -76,11 +81,11 @@ int main()
         Labor += yinv[y] * prod[y];
         if (y < maxygrid - 1)
         {
-            printf("%f, ", prod[y]);
+            printf("%.8f, ", prod[y]);
         }
         else
         {
-            printf("%f", prod[y]);
+            printf("%.8f", prod[y]);
         }
     }
     printf("};\n");
@@ -94,11 +99,11 @@ int main()
             // printf("%f,\t", ytrans[y][k]);
             if (k < maxygrid - 1)
             {
-                printf("%f, ", ytrans[y][k]);
+                printf("%.10f, ", ytrans[y][k]);
             }
             else
             {
-                printf("%f", ytrans[y][k]);
+                printf("%.10f", ytrans[y][k]);
             }
         }
 
