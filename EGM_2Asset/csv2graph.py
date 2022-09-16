@@ -13,14 +13,30 @@ def graph(file_name):
     file_length = len(data[:, 1])
 
     plt.plot(data[:, 1], data[:, 2:])
-    plt.ylim((0,1))
+    plt.ylim((0, 1))
     # plt.show()
     plt.savefig("./figure/"+file_name+".pdf")
     plt.close()
 
-file_name_string = ["Portfolio,pi=0.000000,Psize=100","Portfolio,pi=0.000000,Psize=300","Portfolio,pi=0.000000,Psize=500","Portfolio,pi=0.000000,Psize=2000","Portfolio,pe=e-4,premium=0.000000,wage=0.340000,rf=0.030000,Psize=100","Portfolio,pe=e-5,premium=0.000000,wage=0.340000,rf=0.030000,Psize=100","Portfolio,premium=0.000000,wage=0.340000,rf=0.030000","Portfolio,pe=e-6,premium=0.000000,wage=0.340000,rf=0.030000,Psize=100","Portfolio,pe=e-6,premium=0.050000,wage=0.340000,rf=0.030000,Psize=100"]
-file_name_string.append("Portfolio,pe=e-6,premium=0.010000,wage=0.340000,rf=0.030000,Psize=100")
-file_name_string.append("Portfolio,pe=e-6,premium=0.000050,wage=0.340000,rf=0.030000,Psize=100")
+
+file_name_string = ["Portfolio,pi=0.000000,Psize=100", "Portfolio,pi=0.000000,Psize=300", "Portfolio,pi=0.000000,Psize=500", "Portfolio,pi=0.000000,Psize=2000", "Portfolio,pe=e-4,premium=0.000000,wage=0.340000,rf=0.030000,Psize=100",
+                    "Portfolio,pe=e-5,premium=0.000000,wage=0.340000,rf=0.030000,Psize=100", "Portfolio,premium=0.000000,wage=0.340000,rf=0.030000", "Portfolio,pe=e-6,premium=0.000000,wage=0.340000,rf=0.030000,Psize=100", "Portfolio,pe=e-6,premium=0.050000,wage=0.340000,rf=0.030000,Psize=100"]
+file_name_string.append(
+    "Portfolio,pe=e-6,premium=0.010000,wage=0.340000,rf=0.030000,Psize=100")
+file_name_string.append(
+    "Portfolio,pe=e-6,premium=0.000050,wage=0.340000,rf=0.030000,Psize=100")
+file_name_string.append(
+    "Portfolio,pe=e-6,std=0.015,premium=0.000050,wage=0.640000,rf=0.060000,Psize=100")
+file_name_string.append(
+    "Portfolio,pe=e-6,std=0.2,premium=0.010000,wage=0.640000,rf=0.060000,Psize=100")
+file_name_string.append(
+    "Portfolio,pe=e-6,std=0.01,premium=0.000050,wage=0.340000,rf=0.030000,Psize=100")
+file_name_string.append(
+    "Portfolio,pe=e-6,std=0.01,premium=0.000050,wage=0.340000,rf=0.030000,Psize=2")
+file_name_string.append(
+    "Portfolio,pe=e-6,std=0.2,premium=0.010000,wage=0.340000,rf=0.030000,Psize=2")
+file_name_string.append(
+    "Portfolio,pe=e-6,std=0.2,premium=0.010000,wage=0.640000,rf=0.030000,Psize=2")
 for i in range(len(file_name_string)):
     graph(file_name_string[i])
 
@@ -68,7 +84,6 @@ for i in range(len(file_name_string)):
 # # plt.show()
 # plt.savefig("./figure/"+file_name+".pdf")
 # plt.close()
-
 
 
 # path_name = "./csv/"

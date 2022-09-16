@@ -110,7 +110,8 @@ const double laborincome_trans[7][7] = {
 // {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
 // {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210}};
 
-//  p_e=0.000001, std_e = 0.2
+//  p_e=0.000001,
+double std_e = 0.2;
 const double risk_states[7] = {-0.600000, -0.400000, -0.200000, -0.000000, 0.200000, 0.400000, 0.600000};
 const double risk_trans[7][7] = {
     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
@@ -167,9 +168,9 @@ const double risk_trans[7][7] = {
 
 // const double premium = 0.00005; // 0.0005, 0.0001 not converging, stuck at 3.34268e-006????
 // const double premium = 0.0000;
-const double premium = 0.01;
+double premium = 0.01;
 
-const double r_f = 0.06;
+double r_f = 0.06;
 // const double r_f = 0.040237086402090;
 
 // Function Definitions:
