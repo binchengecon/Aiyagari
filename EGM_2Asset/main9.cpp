@@ -38,7 +38,7 @@ const double rhopar = 3.0;
 const double labor = 1.0219882;
 
 const double epsV = 1.0e-8;
-const double epsPortV = 1.0e-8;
+const double epsPortV = 1.0e-5;
 const double epsdist = 1.0e-9;
 const double epsK = 1.0e-6;
 const double relaxsK = 0.005;
@@ -104,19 +104,8 @@ const double laborincome_trans[7][7] = {
 //     {0.006209, 0.060595, 0.241726, 0.382925, 0.241735, 0.060600, 0.006210},
 //     {0.006209, 0.060594, 0.241724, 0.382925, 0.241737, 0.060601, 0.006210}};
 
-// //  p_e=0.000001, std_e = 0.01
-// const double risk_states[7] = {-0.030000, -0.020000, -0.010000, -0.000000, 0.010000, 0.020000, 0.030000};
-// const double risk_trans[7][7] = {
-//     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
-//     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
-//     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
-//     {0.006210, 0.060598, 0.241730, 0.382925, 0.241730, 0.060598, 0.006210},
-//     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
-//     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
-//     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210}};
-
-//  p_e=0.000001, std_e = 0.2
-const double risk_states[7] = {-0.600000, -0.400000, -0.200000, -0.000000, 0.200000, 0.400000, 0.600000};
+//  p_e=0.000001, std_e = 0.01
+const double risk_states[7] = {-0.030000, -0.020000, -0.010000, -0.000000, 0.010000, 0.020000, 0.030000};
 const double risk_trans[7][7] = {
     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
@@ -126,7 +115,18 @@ const double risk_trans[7][7] = {
     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210}};
 
-const double premium = 0.01; // 0.0005, 0.0001 not converging, stuck at 3.34268e-006????
+// //  p_e=0.000001, std_e = 0.2
+// const double risk_states[7] = {-0.600000, -0.400000, -0.200000, -0.000000, 0.200000, 0.400000, 0.600000};
+// const double risk_trans[7][7] = {
+//     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
+//     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
+//     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
+//     {0.006210, 0.060598, 0.241730, 0.382925, 0.241730, 0.060598, 0.006210},
+//     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
+//     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
+//     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210}};
+
+const double premium = 0.00005; // 0.0005, 0.0001 not converging, stuck at 3.34268e-006????
 // const double premium = 0.0000;
 
 const double r_f = 0.03;
@@ -181,7 +181,253 @@ void null(double *VectorIN, int dim)
     }
 }
 
-void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF, double *dVF, double *save, double *Portfolio, double *Portfolio_final, double K[size_asset], double wagerate)
+void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF, double *dVF, double *save, double *Portfolio, double K[size_asset], double Omega[size_portfoliochoice + 1], double wagerate)
+{
+
+    // INITIALIZATION //
+    double *Kendo, *VFnew, *Kendo_min, tempnext, dtempnext, *eVF, *deVF, critV, vfweight, slope1, slope2, tempvf, *consendo, *VFendo, *cohendo, cohexo, *VF_final_old;
+    VFendo = (double *)calloc((ARLP_dim), sizeof(double)); // Value function on the next time grid, next iteration
+    VFnew = (double *)calloc((ARLP_dim), sizeof(double));  // Value function on the next time grid, next iteration
+
+    VF_final_old = (double *)calloc((ARL_dim), sizeof(double)); // Value function on the next time grid, next iteration
+    // Kendo = (double *)calloc((ARLP_dim), sizeof(double));  // endogenous grid values
+    // Kendo_min = (double *)calloc((maxygrid), sizeof(double)); // endogenous grid values
+    // eVF = (double *)calloc((ARLP_dim), sizeof(double));       // expected value function
+    // deVF = (double *)calloc((ARLP_dim), sizeof(double));      // derivative of the expected value function
+    cohendo = (double *)calloc((ARLP_dim), sizeof(double));  // Value function on the next time grid, next iteration
+    consendo = (double *)calloc((ARLP_dim), sizeof(double)); // Value function on the next time grid, next iteration
+
+    int asset_index, ii, risk_index, risk_indexnext, laborincome_index, laborincome_indexnext, portfoliochoice_index, iter, threshold_ii, Icase, itest, igridL, igridH;
+
+    iter = 0;
+
+    critV = 10000.0;
+    // std::cout << "iter\t"
+    //           << "critV\n";
+
+    while (critV > epsV && iter < 250)
+    {
+        // we need copy to make a separate object
+        copy(VF, VFnew, ARLP_dim);
+
+        null(cohendo, ARLP_dim);
+        null(VFendo, ARLP_dim);
+
+        copy(VF_final, VF_final_old, ARL_dim);
+
+        // std::cout << std::setprecision(16) << VF[index_ARLP(5, 5)] << "\n";
+        // std::cout << std::setprecision(16) << VFnew[index_ARLP(5, 5)] << "\n";
+
+        // main EGM computation
+        for (asset_index = 0; asset_index < size_asset; asset_index++)
+        {
+            for (risk_index = 0; risk_index < size_risk; risk_index++)
+            {
+
+                for (laborincome_index = 0; laborincome_index < size_laborincome; laborincome_index++)
+                {
+
+                    for (portfoliochoice_index = 0; portfoliochoice_index < size_portfoliochoice + 1; portfoliochoice_index++)
+                    {
+
+                        tempnext = 0;
+                        dtempnext = 0;
+
+                        for (risk_indexnext = 0; risk_indexnext < size_risk; risk_indexnext++)
+                        {
+                            for (laborincome_indexnext = 0; laborincome_indexnext < size_laborincome; laborincome_indexnext++)
+                            {
+                                tempnext += risk_trans[risk_index][risk_indexnext] * laborincome_trans[laborincome_index][laborincome_indexnext] * VF[index_ARLP(asset_index, risk_indexnext, laborincome_indexnext, portfoliochoice_index)];
+                                dtempnext += risk_trans[risk_index][risk_indexnext] * laborincome_trans[laborincome_index][laborincome_indexnext] * dVF[index_ARLP(asset_index, risk_indexnext, laborincome_indexnext, portfoliochoice_index)];
+                            }
+                        }
+
+                        cohendo[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] = K[asset_index] + inv_MU(betapar * dtempnext);
+                        VFendo[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] = U(cohendo[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] - K[asset_index]) + betapar * tempnext;
+                    }
+                }
+
+                // try omega here: omega index=portfoliochoice_index
+            }
+        }
+
+        // rescaling
+        for (portfoliochoice_index = 0; portfoliochoice_index < size_portfoliochoice + 1; portfoliochoice_index++)
+        {
+
+            for (risk_index = 0; risk_index < size_risk; risk_index++)
+            {
+                for (laborincome_index = 0; laborincome_index < size_laborincome; laborincome_index++)
+                {
+                    threshold_ii = 0;
+
+                    for (asset_index = 0; asset_index < size_asset; asset_index++)
+                    {
+                        // method 1: cash on hand
+                        cohexo = (1.0 + r_f + (premium + risk_states[risk_index]) * Omega[portfoliochoice_index]) * K[asset_index] + wagerate * laborincome_states[laborincome_index];
+                        // cohexo = (1.0 + r_f * (1 - Omega[portfoliochoice_index]) + (r_f + premium + risk_states[risk_index]) * Omega[portfoliochoice_index]) * K[asset_index] + wagerate * laborincome_states[laborincome_index];
+
+                        if (cohexo < cohendo[index_ARLP(0, risk_index, laborincome_index, portfoliochoice_index)])
+                        {
+                            save[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] = K[0];
+                            VF[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] = U(cohexo - save[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)]) + (VFendo[index_ARLP(0, risk_index, laborincome_index, portfoliochoice_index)] - U((cohendo[index_ARLP(0, risk_index, laborincome_index, portfoliochoice_index)] - K[0])));
+                        }
+
+                        if (cohexo >= cohendo[index_ARLP(0, risk_index, laborincome_index, portfoliochoice_index)])
+                        {
+                            itest = threshold_ii;
+
+                            while ((itest < size_asset) && cohexo > cohendo[(index_ARLP(itest, risk_index, laborincome_index, portfoliochoice_index))])
+                            {
+                                itest++;
+                            }
+
+                            if (itest == size_asset)
+                            {
+                                // extrapolation
+                                vfweight = (cohexo - cohendo[index_ARLP(size_asset - 2, risk_index, laborincome_index, portfoliochoice_index)]) / (cohendo[index_ARLP(size_asset - 1, risk_index, laborincome_index, portfoliochoice_index)] - cohendo[index_ARLP(size_asset - 2, risk_index, laborincome_index, portfoliochoice_index)]);
+                                igridL = size_asset - 2;
+                                igridH = size_asset - 1;
+                            }
+                            else
+                            {
+                                // standard interior
+                                vfweight = (cohexo - cohendo[index_ARLP(itest - 1, risk_index, laborincome_index, portfoliochoice_index)]) / (cohendo[index_ARLP(itest, risk_index, laborincome_index, portfoliochoice_index)] - cohendo[index_ARLP(itest - 1, risk_index, laborincome_index, portfoliochoice_index)]);
+                                igridL = itest - 1;
+                                igridH = itest - 0;
+                            }
+
+                            VF[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] = inter1d(vfweight, VFendo[index_ARLP(igridL, risk_index, laborincome_index, portfoliochoice_index)], VFendo[index_ARLP(igridH, risk_index, laborincome_index, portfoliochoice_index)]);
+                            save[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] = inter1d(vfweight, K[igridL], K[igridH]);
+
+                            threshold_ii = min(size_asset - 2, itest);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (asset_index = 0; asset_index < size_asset; asset_index++)
+        {
+            for (risk_index = 0; risk_index < size_risk; risk_index++)
+            {
+                for (laborincome_index = 0; laborincome_index < size_laborincome; laborincome_index++)
+                {
+
+                    double temp;
+                    int itemp;
+
+                    for (portfoliochoice_index = 0; portfoliochoice_index < size_portfoliochoice + 1; portfoliochoice_index++)
+                    {
+                        tempnext = 0.0;
+                        for (risk_indexnext = 0; risk_indexnext < size_risk; risk_indexnext++)
+                        {
+                            for (laborincome_indexnext = 0; laborincome_indexnext < size_laborincome; laborincome_indexnext++)
+                            {
+                                tempnext += risk_trans[risk_index][risk_indexnext] * laborincome_trans[laborincome_index][laborincome_indexnext] * VF[index_ARLP(asset_index, risk_indexnext, laborincome_indexnext, portfoliochoice_index)];
+                            }
+                        }
+
+                        // std::cout << tempnext << "\n";
+                        if (portfoliochoice_index == 0)
+                        {
+                            temp = tempnext;
+                            itemp = 0;
+                        }
+
+                        if (tempnext > temp)
+                        {
+                            temp = tempnext;
+                            itemp = portfoliochoice_index;
+                        }
+                    }
+
+                    VF_final[index_ARL(asset_index, risk_index, laborincome_index)] = VF[index_ARLP(asset_index, laborincome_index, risk_index, itemp)];
+                    save_final[index_ARL(asset_index, risk_index, laborincome_index)] = save[index_ARLP(asset_index, risk_index, laborincome_index, itemp)];
+                    Portfolio[index_ARL(asset_index, risk_index, laborincome_index)] = Omega[itemp];
+                }
+            }
+        }
+
+        // std::cout << std::setprecision(16) << VF[index_ARLP(5, 5)] << "\n";
+
+        // computing new derivatives and convergence
+        critV = 0.0;
+
+        for (risk_index = 0; risk_index < size_risk; risk_index++)
+        {
+            for (laborincome_index = 0; laborincome_index < size_laborincome; laborincome_index++)
+            {
+                for (asset_index = 0; asset_index < size_asset; asset_index++)
+                {
+
+                    if (asset_index >= 2)
+                    {
+                        dVF_final[index_ARL(asset_index - 1, risk_index, laborincome_index)] = nderiv(VF_final[index_ARL(asset_index - 2, risk_index, laborincome_index)], VF_final[index_ARL(asset_index - 1, risk_index, laborincome_index)], VF_final[index_ARL(asset_index, risk_index, laborincome_index)], K[asset_index - 2], K[asset_index - 1], K[asset_index]);
+                    }
+
+                    critV = max(critV, abs(VF_final[index_ARL(asset_index, risk_index, laborincome_index)] - VF_final_old[index_ARL(asset_index, risk_index, laborincome_index)]));
+
+                    // left corner
+                    dVF_final[index_ARL(0, risk_index, laborincome_index)] = (VF_final[index_ARL(1, risk_index, laborincome_index)] - VF_final[index_ARL(0, risk_index, laborincome_index)]) / (K[1] - K[0]);
+                    // right corner
+                    dVF_final[index_ARL(size_asset - 1, risk_index, laborincome_index)] = (VF_final[index_ARL(size_asset - 1, risk_index, laborincome_index)] - VF_final[index_ARL(size_asset - 2, risk_index, laborincome_index)]) / (K[size_asset - 1] - K[size_asset - 2]);
+                }
+            }
+        }
+
+        // for (portfoliochoice_index = 0; portfoliochoice_index < size_portfoliochoice; portfoliochoice_index++)
+        // {
+        //     for (risk_index = 0; risk_index < size_risk; risk_index++)
+        //     {
+        //         for (laborincome_index = 0; laborincome_index < size_laborincome; laborincome_index++)
+        //         {
+        //             for (asset_index = 0; asset_index < size_asset; asset_index++)
+        //             {
+
+        //                 if (asset_index >= 2)
+        //                 {
+        //                     dVF[index_ARLP(asset_index - 1, risk_index, laborincome_index, portfoliochoice_index)] = nderiv(VF[index_ARLP(asset_index - 2, risk_index, laborincome_index, portfoliochoice_index)], VF[index_ARLP(asset_index - 1, risk_index, laborincome_index, portfoliochoice_index)], VF[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)], K[asset_index - 2], K[asset_index - 1], K[asset_index]);
+        //                 }
+
+        //                 // left corner
+        //                 dVF[index_ARLP(0, risk_index, laborincome_index, portfoliochoice_index)] = (VF[index_ARLP(1, risk_index, laborincome_index, portfoliochoice_index)] - VF[index_ARLP(0, risk_index, laborincome_index, portfoliochoice_index)]) / (K[1] - K[0]);
+        //                 // right corner
+        //                 dVF[index_ARLP(size_asset - 1, risk_index, laborincome_index, portfoliochoice_index)] = (VF[index_ARLP(size_asset - 1, risk_index, laborincome_index, portfoliochoice_index)] - VF[index_ARLP(size_asset - 2, risk_index, laborincome_index, portfoliochoice_index)]) / (K[size_asset - 1] - K[size_asset - 2]);
+        //             }
+        //         }
+        //     }
+        // }
+
+        for (portfoliochoice_index = 0; portfoliochoice_index < size_portfoliochoice + 1; portfoliochoice_index++)
+        {
+            for (risk_index = 0; risk_index < size_risk; risk_index++)
+            {
+                for (laborincome_index = 0; laborincome_index < size_laborincome; laborincome_index++)
+                {
+                    for (asset_index = 0; asset_index < size_asset; asset_index++)
+                    {
+
+                        if (asset_index >= 2)
+                        {
+                            dVF[index_ARLP(asset_index - 1, risk_index, laborincome_index, portfoliochoice_index)] = nderiv(VF_final[index_ARL(asset_index - 2, risk_index, laborincome_index)], VF_final[index_ARL(asset_index - 1, risk_index, laborincome_index)], VF_final[index_ARL(asset_index, risk_index, laborincome_index)], K[asset_index - 2], K[asset_index - 1], K[asset_index]);
+                        }
+
+                        // left corner
+                        dVF[index_ARLP(0, risk_index, laborincome_index, portfoliochoice_index)] = (VF_final[index_ARL(1, risk_index, laborincome_index)] - VF_final[index_ARL(0, risk_index, laborincome_index)]) / (K[1] - K[0]);
+                        // right corner
+                        dVF[index_ARLP(size_asset - 1, risk_index, laborincome_index, portfoliochoice_index)] = (VF_final[index_ARL(size_asset - 1, risk_index, laborincome_index)] - VF_final[index_ARL(size_asset - 2, risk_index, laborincome_index)]) / (K[size_asset - 1] - K[size_asset - 2]);
+                    }
+                }
+            }
+        }
+        iter++;
+
+        std::cout << "iteration=" << iter << ", critV=" << critV << "\n";
+    }
+}
+
+void POLICY_GR(double *VF_final, double *dVF_final, double *save_final, double *VF, double *dVF, double *save, double *Portfolio, double *Portfolio_final, double K[size_asset], double wagerate)
 {
 
     // INITIALIZATION //
@@ -225,6 +471,20 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
         critPortV = 10000.0;
 
         iterPortV = 0;
+
+        for (portfoliochoice_index = 0; portfoliochoice_index < size_portfoliochoice; portfoliochoice_index++)
+        {
+            for (asset_index = 0; asset_index < size_asset; asset_index++)
+            {
+                for (risk_index = 0; risk_index < size_risk; risk_index++)
+                {
+                    for (laborincome_index = 0; laborincome_index < size_laborincome; laborincome_index++)
+                    {
+                        Portfolio[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] = portfoliochoice_index + 0.0;
+                    }
+                }
+            }
+        }
 
         while (critPortV > epsPortV)
         {
@@ -404,8 +664,9 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                 }
             }
             iterPortV++;
-            std::cout << "PortV-iteration=" << iterPortV << ", critV=" << critV << "\n";
         }
+
+        std::cout << "PortV-iteration=" << iterPortV << ", critPortV=" << critPortV << "\n";
 
         // std::cout << std::setprecision(16) << VF[index_ARLP(5, 5)] << "\n";
 
@@ -442,6 +703,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                 {
                     for (asset_index = 0; asset_index < size_asset; asset_index++)
                     {
+                        VF[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] = VF_final[index_ARL(asset_index, risk_index, laborincome_index)];
 
                         if (asset_index >= 2)
                         {
@@ -474,7 +736,7 @@ void SIMULATION(double *save, double *dist, double *capitalout, double K[size_as
     critdist = 1.0;
     iter = 0;
 
-    while (critdist > epsdist && iter < 3000)
+    while (critdist > epsdist && iter < 200)
     {
         copy(dist, distold, ARL_dim);
         null(dist, ARL_dim);
@@ -670,7 +932,8 @@ int main()
             }
         }
     }
-    POLICY(VF_final, dVF_final, save_final, VF, dVF, save, Portfolio, Portfolio_final, K, wagerate);
+    // POLICY(VF_final, dVF_final, save_final, VF, dVF, save, Portfolio, Portfolio_final, K, wagerate);
+    POLICY_GR(VF_final, dVF_final, save_final, VF, dVF, save, Portfolio, Portfolio_final, K, wagerate);
     printf("Policy Computation Done\n");
     SIMULATION(save_final, distin_final, &capital1, K);
 
@@ -689,10 +952,10 @@ int main()
     CreateFolder(".\\csv\\");
     CreateFolder(".\\figure\\");
 
-    std::string filename_dist = "csv\\dist,pe=e-6,std=0.2,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
-    std::string filename_policy = "csv\\policy,pe=e-6,std=0.2,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
-    std::string filename_VF = "csv\\VF,pe=e-6,std=0.2,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
-    std::string filename_Port = "csv\\Portfolio,pe=e-6,std=0.2,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
+    std::string filename_dist = "csv\\dist,pe=e-6,std=0.01,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
+    std::string filename_policy = "csv\\policy,pe=e-6,std=0.01,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
+    std::string filename_VF = "csv\\VF,pe=e-6,std=0.01,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
+    std::string filename_Port = "csv\\Portfolio,pe=e-6,std=0.01,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
 
     std::ofstream dfilecsv;
     dfilecsv.open(filename_dist);

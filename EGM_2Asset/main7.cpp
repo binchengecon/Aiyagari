@@ -99,19 +99,8 @@ const double laborincome_trans[7][7] = {
 //     {0.006209, 0.060595, 0.241726, 0.382925, 0.241735, 0.060600, 0.006210},
 //     {0.006209, 0.060594, 0.241724, 0.382925, 0.241737, 0.060601, 0.006210}};
 
-// //  p_e=0.000001, std_e = 0.01
-// const double risk_states[7] ={-0.030000, -0.020000, -0.010000, -0.000000, 0.010000, 0.020000, 0.030000};
-// const double risk_trans[7][7] = {
-// {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
-// {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
-// {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
-// {0.006210, 0.060598, 0.241730, 0.382925, 0.241730, 0.060598, 0.006210},
-// {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
-// {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
-// {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210}};
-
-//  p_e=0.000001, std_e = 0.2
-const double risk_states[7] = {-0.600000, -0.400000, -0.200000, -0.000000, 0.200000, 0.400000, 0.600000};
+//  p_e=0.000001, std_e = 0.01
+const double risk_states[7] = {-0.030000, -0.020000, -0.010000, -0.000000, 0.010000, 0.020000, 0.030000};
 const double risk_trans[7][7] = {
     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
@@ -120,6 +109,17 @@ const double risk_trans[7][7] = {
     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210}};
+
+// //  p_e=0.000001, std_e = 0.2
+// const double risk_states[7] = {-0.600000, -0.400000, -0.200000, -0.000000, 0.200000, 0.400000, 0.600000};
+// const double risk_trans[7][7] = {
+//     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
+//     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
+//     {0.006210, 0.060598, 0.241731, 0.382925, 0.241730, 0.060597, 0.006210},
+//     {0.006210, 0.060598, 0.241730, 0.382925, 0.241730, 0.060598, 0.006210},
+//     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
+//     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210},
+//     {0.006210, 0.060597, 0.241730, 0.382925, 0.241731, 0.060598, 0.006210}};
 
 // //  p_e=0.000001, std_e = 0.05
 // const double risk_states[7] ={-0.15000000, -0.10000000, -0.05000000, -0.00000000, 0.05000000, 0.10000000, 0.15000000};
@@ -167,9 +167,9 @@ const double risk_trans[7][7] = {
 
 // const double premium = 0.00005; // 0.0005, 0.0001 not converging, stuck at 3.34268e-006????
 // const double premium = 0.0000;
-const double premium = 0.01;
+const double premium = 0.00005;
 
-const double r_f = 0.06;
+const double r_f = 0.03;
 // const double r_f = 0.040237086402090;
 
 // Function Definitions:
@@ -448,6 +448,8 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                     for (asset_index = 0; asset_index < size_asset; asset_index++)
                     {
 
+                        // VF[index_ARLP(asset_index, risk_index, laborincome_index, portfoliochoice_index)] = VF_final[index_ARL(asset_index, risk_index, laborincome_index)];
+
                         if (asset_index >= 2)
                         {
                             dVF[index_ARLP(asset_index - 1, risk_index, laborincome_index, portfoliochoice_index)] = nderiv(VF_final[index_ARL(asset_index - 2, risk_index, laborincome_index)], VF_final[index_ARL(asset_index - 1, risk_index, laborincome_index)], VF_final[index_ARL(asset_index, risk_index, laborincome_index)], K[asset_index - 2], K[asset_index - 1], K[asset_index]);
@@ -596,7 +598,7 @@ int main()
 
     rrate = 0.040237086402090;
     // wagerate = 1.18;
-    wagerate = 0.64;
+    wagerate = 0.34;
     distin_final[0] = 1.0;
     // taxL=0.3
 
@@ -686,10 +688,10 @@ int main()
     CreateFolder(".\\csv\\");
     CreateFolder(".\\figure\\");
 
-    std::string filename_dist = "csv\\dist,pe=e-6,std=0.2,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
-    std::string filename_policy = "csv\\policy,pe=e-6,std=0.2,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
-    std::string filename_VF = "csv\\VF,pe=e-6,std=0.2,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
-    std::string filename_Port = "csv\\Portfolio,pe=e-6,std=0.2,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
+    std::string filename_dist = "csv\\dist7adjust,pe=e-6,std=0.01,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
+    std::string filename_policy = "csv\\policy7adjust,pe=e-6,std=0.01,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
+    std::string filename_VF = "csv\\VF7adjust,pe=e-6,std=0.01,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
+    std::string filename_Port = "csv\\Portfolio7adjust,pe=e-6,std=0.01,premium=" + std::to_string(premium) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ".csv ";
 
     std::ofstream dfilecsv;
     dfilecsv.open(filename_dist);

@@ -1,6 +1,13 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+
+mpl.rcParams["lines.linewidth"] = 1
+mpl.rcParams["savefig.bbox"] = "tight"
+mpl.rcParams["figure.figsize"] = (26, 15)
+mpl.rcParams["font.size"] = 15
+mpl.rcParams["legend.frameon"] = False
 
 
 def graph(file_name):
@@ -37,6 +44,40 @@ file_name_string.append(
     "Portfolio,pe=e-6,std=0.2,premium=0.010000,wage=0.340000,rf=0.030000,Psize=2")
 file_name_string.append(
     "Portfolio,pe=e-6,std=0.2,premium=0.010000,wage=0.640000,rf=0.030000,Psize=2")
+file_name_string.append(
+    "Portfolio,pe=e-6,std=0.01,premium=0.000050,wage=0.640000,rf=0.030000,Psize=2")
+file_name_string.append(
+    "Portfolio7adjust,pe=e-6,std=0.01,premium=0.000050,wage=0.340000,rf=0.030000,Psize=100")
+file_name_string.append(
+    "Portfolio10,pe=e-6,std=0.01,premium=0.000050,wage=0.340000,rf=0.030000,Psize=100")
+file_name_string.append(
+    "Portfolio10,pe=e-6,std=0.01,premium=0.000050,wage=0.340000,rf=0.040237,Psize=100,rho_c=2.000000,rho_w=3.000000")
+file_name_string.append(
+    "Portfolio10,pe=e-6,std=0.01,premium=0.000050,wage=0.340000,rf=0.040237,Psize=100,rho_c=1.500000,rho_w=4.000000")
+file_name_string.append(
+    "Portfolio12,pe=e-9,std=0.01,premium=0.000050,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,Ksize=300,relaxVF=0.000000")
+file_name_string.append(
+    "Portfolio12,pe=e-9,std=0.01,premium=0.000000,wage=0.800000,rf=0.030000,Psize=20,rho_c=3.000000")
+file_name_string.append(
+    "Portfolio12,pe=e-9,std=0.01,premium=0.000000,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000")
+
+file_name_string.append(
+    "Portfolio11,pe=e-9,std=0.01,premium=0.000050,wage=0.600000,rf=0.030000,Psize=100,rho_c=3.000000")
+file_name_string.append(
+    "Portfolio12ad,pe=e-9,std=0.01,premium=0.000050,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,Ksize=300,relaxVF=0.000000")
+file_name_string.append(
+    "Portfolio12ad,pe=e-9,std=0.2,premium=0.000050,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,Ksize=300,relaxVF=0.000000,beta=0.800000")
+file_name_string.append(
+    "Portfolio12ad,pe=e-9,std=0.2,premium=0.000500,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,Ksize=300,relaxVF=0.000000,beta=0.800000")
+file_name_string.append(
+    "Portfolio12ad,pe=e-9,std=0.2,premium=0.005000,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,Ksize=300,relaxVF=0.000000,beta=0.800000")
+file_name_string.append(
+    "Portfolio12ad,pe=e-9,std=0.2,premium=0.050000,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,Ksize=300,relaxVF=0.000000,beta=0.800000")
+file_name_string.append(
+    "Portfolio12ad,pe=e-9,std=0.2,premium=0.010000,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,Ksize=300,relaxVF=0.000000,beta=0.800000")
+file_name_string.append(
+    "Portfolio12ad,pe=e-9,std=0.2,premium=0.010000,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,Ksize=300,relaxVF=0.000000,beta=0.900000")
+
 for i in range(len(file_name_string)):
     graph(file_name_string[i])
 
