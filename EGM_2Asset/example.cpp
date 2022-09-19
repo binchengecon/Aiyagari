@@ -9,7 +9,7 @@
 #include <math.h>
 #include <algorithm>
 double pi;
-const double rhopar = 3.0;
+double rhopar;
 
 #define U(x) (pow((x), (1.0 - rhopar)) / (1.0 - rhopar))
 // int main()
@@ -20,35 +20,25 @@ const double rhopar = 3.0;
 //     policyfilecsv.open(var);
 // }
 
-double sstates[7] = {-0.030000, -0.020000, -0.010000, 0.000000, 0.010000, 0.020000, 0.030000};
-double strans[7][7] = {
-    {0.006262, 0.060934, 0.242398, 0.382924, 0.241063, 0.060262, 0.006157},
-    {0.006245, 0.060822, 0.242175, 0.382924, 0.241285, 0.060374, 0.006175},
-    {0.006227, 0.060710, 0.241953, 0.382925, 0.241508, 0.060486, 0.006192},
-    {0.006210, 0.060597, 0.241730, 0.382925, 0.241730, 0.060597, 0.006210},
-    {0.006192, 0.060486, 0.241508, 0.382925, 0.241953, 0.060710, 0.006227},
-    {0.006175, 0.060374, 0.241285, 0.382924, 0.242175, 0.060822, 0.006245},
-    {0.006157, 0.060262, 0.241063, 0.382924, 0.242398, 0.060934, 0.006262}};
-
-double sstates_nextperiod[7] = {-0.030000, -0.020000, -0.010000, 0.000000, 0.010000, 0.020000, 0.030000};
-double strans_nextperiod[7][7];
-
-// int main(int argc, char **argv)
-int main()
+int main(int argc, char **argv)
+// int main()
 
 {
 
-    // int i;
+    int i;
     // pi = 1;
-    // std::cout << "You have entered " << argc
-    //           << " arguments:"
-    //           << "\n";
+    std::cout << "You have entered " << argc
+              << " arguments:"
+              << "\n";
 
-    // for (i = 0; i < argc; ++i)
-    //     std::cout << argv[i] << "\n";
+    for (i = 0; i < argc; ++i)
+        std::cout << argv[i] << "\n";
 
-    // std::istringstream iss(argv[1]);
-    // iss >> pi;
+    std::istringstream iss(argv[1]);
+    iss >> rhopar;
+
+    std::cout << rhopar <<"\n";
+    std::cout << U(1);
 
     // int val = std::stoi(argv[1]);
     // double val2 = std::atof(argv[2]);
@@ -80,12 +70,12 @@ int main()
     // }
     // std::cout << U(0.0);
 
-    int i1, i2, i3, i4;
-    for (i1 = 0; i1 < 7; i1++)
-    {
-        for (i2 = 0; i2 < 7; i2++)
-        {
-            strans_nextperiod[i1][i2] = 0;
-        }
-    }
+    // int i1, i2, i3, i4;
+    // for (i1 = 0; i1 < 7; i1++)
+    // {
+    //     for (i2 = 0; i2 < 7; i2++)
+    //     {
+    //         strans_nextperiod[i1][i2] = 0;
+    //     }
+    // }
 }
