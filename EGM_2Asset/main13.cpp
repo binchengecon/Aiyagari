@@ -33,8 +33,8 @@ const double kmax = 200.0;
 const double betapar = 0.9;
 const double alphapar = 0.36;
 const double deltapar = 0.08;
-const double rhopar = 3.0;
-const double rhopar_w = 3.0;
+const double rhopar = 1.5;
+const double rhopar_w = 20.0;
 const double labor = 1.0219882;
 
 const double epsV = 1.0e-8;
@@ -213,7 +213,7 @@ const double r_f = 0.03;
 #define MUc(x) (pow((x), -rhopar))
 #define inv_MU(u) (pow((u), (-(1.0 / rhopar))))
 #define U(x) (pow((x), (1.0 - rhopar)) / (1.0 - rhopar))
-#define Uw(x) (pow((x + 0.001), (1.0 - rhopar_w)) / (1.0 - rhopar_w))
+#define Uw(x) 5.0*(pow((x + 0.001), (1.0 - rhopar_w)) / (1.0 - rhopar_w))
 
 // Grid
 #define inter1d(x1, y1, y2) ((1.0 - (x1)) * (y1) + (x1) * (y2))

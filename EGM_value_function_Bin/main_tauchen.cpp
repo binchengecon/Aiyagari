@@ -14,9 +14,10 @@ int main()
 
     const int size_k = 500; // number of grid points
 
-    const double p_e = 0.000001;
-    // const double std_e = 0.01;
-    const double std_e = 0.015;
+    const double p_e = 0.6;
+    // const double std_e = 0.2;
+
+    const double std_e = 0.16;
 
     // const double m_e = 3;
     // const int m_e = 6;

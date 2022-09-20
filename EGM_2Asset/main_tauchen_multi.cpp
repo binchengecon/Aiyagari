@@ -1,7 +1,7 @@
 
 #include <cmath>
 #include <cstdio>
-#include "tauchen.cpp"
+#include "tauchen_multi.cpp"
 #include <iostream>
 
 // INDEX //
@@ -26,7 +26,7 @@ int main()
 
     double prod[maxygrid], ytrans[maxygrid][maxygrid], ytrans_next[maxygrid][maxygrid], yinv[maxygrid], Labor, temp;
 
-    tauchenfun(p_e, m_e, 0.0, std_e, prod, ytrans);
+    tauchenfun2D(p_e, m_e, 0.0, std_e, prod, ytrans);
     // inv_distri(yinv, ytrans);
 
     int i1, i2, i3, i4;

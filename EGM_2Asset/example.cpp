@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <math.h>
 #include <algorithm>
+#include "tauchen_multi.cpp"
+
 double pi;
 double rhopar;
 
@@ -25,20 +27,20 @@ int main(int argc, char **argv)
 
 {
 
-    int i;
-    // pi = 1;
-    std::cout << "You have entered " << argc
-              << " arguments:"
-              << "\n";
+    // int i;
+    // // pi = 1;
+    // std::cout << "You have entered " << argc
+    //           << " arguments:"
+    //           << "\n";
 
-    for (i = 0; i < argc; ++i)
-        std::cout << argv[i] << "\n";
+    // for (i = 0; i < argc; ++i)
+    //     std::cout << argv[i] << "\n";
 
-    std::istringstream iss(argv[1]);
-    iss >> rhopar;
+    // std::istringstream iss(argv[1]);
+    // iss >> rhopar;
 
-    std::cout << rhopar <<"\n";
-    std::cout << U(1);
+    // std::cout << rhopar <<"\n";
+    // std::cout << U(1);
 
     // int val = std::stoi(argv[1]);
     // double val2 = std::atof(argv[2]);
@@ -78,4 +80,8 @@ int main(int argc, char **argv)
     //         strans_nextperiod[i1][i2] = 0;
     //     }
     // }
+
+
+int
+
 }

@@ -21,6 +21,7 @@ def graph(file_name):
 
     plt.plot(data[:, 1], data[:, 2:])
     plt.ylim((0, 1))
+    plt.xlim((0,50))
     # plt.show()
     plt.savefig("./figure/"+file_name+".pdf")
     plt.close()
@@ -79,6 +80,11 @@ file_name_string.append(
     "Portfolio12ad,pe=e-9,std=0.2,premium=0.010000,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,Ksize=300,relaxVF=0.000000,beta=0.900000")
 file_name_string.append(
     "Portfolio13,pe=e-9,std=0.2,premium=0.010000,wage=0.800000,rf=0.030000,Psize=100,rho_c=3.000000,rho_w=3.000000,Ksize=300,relaxVF=0.500000,beta=0.900000")
+file_name_string.append("Portfolio13,pe=e-9,std=0.2,premium=0.010000,wage=0.800000,rf=0.030000,Psize=100,rho_c=2.000000,rho_w=5.000000,Ksize=300,relaxVF=0.500000,beta=0.900000")
+file_name_string.append("Portfolio13,pe=e-9,std=0.2,premium=0.010000,wage=0.800000,rf=0.030000,Psize=100,rho_c=2.000000,rho_w=10.000000,Ksize=300,relaxVF=0.500000,beta=0.900000")
+file_name_string.append("Portfolio13,pe=e-9,std=0.2,premium=0.010000,wage=0.800000,rf=0.030000,Psize=100,rho_c=2.000000,rho_w=20.000000,Ksize=300,relaxVF=0.500000,beta=0.900000")
+
+
 
 for i in range(len(file_name_string)):
     graph(file_name_string[i])
