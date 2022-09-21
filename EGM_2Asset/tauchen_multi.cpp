@@ -1,3 +1,8 @@
+
+// #include <cmath>
+// #include <cstdio>
+// #include <iostream>
+
 // Contributor: Bin (2022)
 
 // Purpose:
@@ -349,7 +354,7 @@ double CDFSTDNormal_2D_r0y1(double ah, double ak, double r)
 
 double CDFSTDNormal_2D_r0y0(double ah, double ak, double r)
 {
-	return 1 - CDFSTDNormal_2D_r1y1(ah, ak, r) - CDFSTDNormal_2D_r0y1(ah, ak, r) - CDFSTDNormal_2D_r1y1(ah, ak, r);
+	return 1 - CDFSTDNormal_2D_r1y1(ah, ak, r) - CDFSTDNormal_2D_r0y1(ah, ak, r) - CDFSTDNormal_2D_r1y0(ah, ak, r);
 }
 
 const int cola = 2, rowa = 2, colb = 2, rowb = 2;
@@ -539,13 +544,15 @@ void deVec(double M_vec[16], double M[4][4])
 		}
 	}
 }
+// template <size_t Nodes>
 
-template <size_t Nodes>
-void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, double sigma1, double sigma2, double corr, double grid1[Nodes * Nodes], double gird2[Nodes * Nodes], double Ptransi[Nodes * Nodes][Nodes * Nodes])
+template <size_t Nodessq>
+void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, double sigma1, double sigma2, double corr, double grid1[Nodessq], double grid2[Nodessq], double Ptransi[Nodessq][Nodessq])
+
 {
 
 	int i, j, k;
-
+	int Nodes = sqrt(Nodessq);
 	double AR[2][2] = {{rho1, 0}, {0, rho2}},
 		   Sigma[2][2] = {{sigma1 * sigma1, corr * sigma1 * sigma2}, {corr * sigma1 * sigma2, sigma2 * sigma2}}, I[4][4];
 	double ARAR[4][4], IDARAR[4][4], IDARAR_inv[4][4], Sigma_vec[4], Var_Vec[4];
@@ -562,18 +569,20 @@ void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, 
 
 	// First lets compute unconditiontal variance of yt
 
-	double var1t = (Var_Vec[0] * Var_Vec[0]) / (1 - rho1 * rho1);
-	double var2t = (Var_Vec[3] * Var_Vec[3]) / (1 - rho2 * rho2);
-
 	// Compute stddev of yt
 
-	double std1t = sqrt(var1t);
-	double std2t = sqrt(var2t);
+	// double std1t = sqrt(var1t);
+	double std1t = sqrt(Var_Vec[0]);
 
-	// std::cout << "value of std_e="<<stdyt <<"\n";
+	// double std2t = sqrt(var2t);
+	double std2t = sqrt(Var_Vec[3]);
+
+	std::cout << "value of std_e1=" << std1t << "\n";
+	std::cout << "value of std_e2=" << std2t << "\n";
 	// Define maximum and minimum grid point
 
-	double y1nodes[Nodes], y2nodes[Nodes];
+	double y1nodes[Nodes],
+		y2nodes[Nodes];
 
 	y1nodes[Nodes - 1] = m * std1t;
 	y1nodes[0] = -y1nodes[Nodes - 1];
@@ -639,11 +648,11 @@ void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, 
 
 			jr = 0;
 
-			for (jy = 1; jy < (Nodes - 1); jy++)
+			for (jy = 1; jy < Nodes - 1; jy++)
 			{
 				temp = 0;
 				index_ry_next = jr * Nodes + jy;
-				temp = CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
+				temp += CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
 				temp -= CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
 				transitionMat[index_ry][index_ry_next] = temp;
 				temp = 0;
@@ -654,7 +663,7 @@ void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, 
 
 			temp = 0;
 			index_ry_next = jr * Nodes + jy;
-			temp = CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
+			temp += CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
 			transitionMat[index_ry][index_ry_next] = temp;
 			temp = 0;
 
@@ -662,7 +671,7 @@ void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, 
 
 			temp = 0;
 			index_ry_next = jr * Nodes + jy;
-			temp = CDFSTDNormal_2D_r0y1((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
+			temp += CDFSTDNormal_2D_r0y1((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
 			transitionMat[index_ry][index_ry_next] = temp;
 			temp = 0;
 
@@ -677,8 +686,10 @@ void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, 
 				{
 					temp = 0;
 					index_ry_next = jr * Nodes + jy;
-					temp = CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
-					temp -= CDFSTDNormal_2D_r0y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
+					temp += CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
+					temp -= CDFSTDNormal_2D_r0y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
+					temp -= CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
+					temp += CDFSTDNormal_2D_r0y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
 					transitionMat[index_ry][index_ry_next] = temp;
 					temp = 0;
 					//
@@ -688,7 +699,7 @@ void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, 
 
 				temp = 0;
 				index_ry_next = jr * Nodes + jy;
-				temp = CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
+				temp += CDFSTDNormal_2D_r0y0((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
 				temp -= CDFSTDNormal_2D_r0y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
 				transitionMat[index_ry][index_ry_next] = temp;
 				temp = 0;
@@ -697,7 +708,7 @@ void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, 
 
 				temp = 0;
 				index_ry_next = jr * Nodes + jy;
-				temp = CDFSTDNormal_2D_r0y1((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
+				temp += CDFSTDNormal_2D_r0y1((y1nodes[jr] + y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
 				temp -= CDFSTDNormal_2D_r0y1((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
 				transitionMat[index_ry][index_ry_next] = temp;
 				temp = 0;
@@ -707,23 +718,23 @@ void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, 
 			//							jr=n1-1,0<jy<n2-1		r_j-delta_r/2 <	(1-rho1)*mu_r + rho1*r_i+epsilon	&&	y_j-delta_y/2 < (1-rho2)*mu_y + rho2*y_i+epsilon <  y_j+delta_y/2
 			// 							jr=n1-1,jy=n2-1			r_j-delta_r/2 <	(1-rho1)*mu_r + rho1*r_i+epsilon	&&	y_j-delta_y/2 < (1-rho2)*mu_y + rho2*y_i+epsilon
 
-			jr = Node - 1;
+			jr = Nodes - 1;
 
 			for (jy = 1; jy < (Nodes - 1); jy++)
 			{
-			temp = 0;
-			index_ry_next = jr * Nodes + jy;
-			temp = CDFSTDNormal_2D_r1y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
-			temp -= CDFSTDNormal_2D_r1y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
-			transitionMat[index_ry][index_ry_next] = temp;
-			temp = 0;				//
+				temp = 0;
+				index_ry_next = jr * Nodes + jy;
+				temp += CDFSTDNormal_2D_r1y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
+				temp -= CDFSTDNormal_2D_r1y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
+				transitionMat[index_ry][index_ry_next] = temp;
+				temp = 0; //
 			}
 
 			jy = 0;
 
 			temp = 0;
 			index_ry_next = jr * Nodes + jy;
-			temp = CDFSTDNormal_2D_r1y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
+			temp += CDFSTDNormal_2D_r1y0((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] + y2nodesinterval / 2 - tempy) / std2t, corr);
 			transitionMat[index_ry][index_ry_next] = temp;
 			temp = 0;
 
@@ -731,86 +742,77 @@ void tauchenfun2D(double rho1, double rho2, double m, double amu1, double amu2, 
 
 			temp = 0;
 			index_ry_next = jr * Nodes + jy;
-			temp -= CDFSTDNormal_2D_r1y1((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
+			temp += CDFSTDNormal_2D_r1y1((y1nodes[jr] - y1nodesinterval / 2 - tempr) / std1t, (y2nodes[jy] - y2nodesinterval / 2 - tempy) / std2t, corr);
 			transitionMat[index_ry][index_ry_next] = temp;
 			temp = 0;
 		}
-
-		for (j = 0; j < Nodes; j++)
-		{
-			for (k = 1; k < (Nodes - 1); k++)
-			{
-
-				transitionMat[j][k] = CDFSTDNormal((ynodes[k] - (1 - A[2]) * amu - A[2] * ynodes[j] + ynodesinterval / 2.0) / sigma) - CDFSTDNormal((ynodes[k] - (1 - A[2]) * amu - A[2] * ynodes[j] - ynodesinterval / 2.0) / sigma);
-			}
-
-			transitionMat[j][0] = CDFSTDNormal((ynodes[0] - (1 - A[2]) * amu - A[2] * ynodes[j] + ynodesinterval / 2.0) / sigma);
-			transitionMat[j][Nodes - 1] = 1.0 - CDFSTDNormal((ynodes[Nodes - 1] - (1 - A[2]) * amu - A[2] * ynodes[j] - ynodesinterval / 2.0) / sigma);
-		}
-
-		for (j = 0; j < Nodes; j++)
-		{
-			for (k = 0; k < (Nodes); k++)
-			{
-				Ptransi[j][k] = transitionMat[j][k];
-			}
-		}
 	}
 
-	// Gaussian Quadratures.
-	typedef double DP;
-	void gauher(double x[], double w[], int ngrid)
+	for (j = 0; j < Nodes * Nodes; j++)
 	{
-		const DP EPS = 1.0e-14, PIM4 = 0.7511255444649425;
-		const int MAXIT = 10;
-		int i, its, j, m;
-		DP p1 = 0, p2 = 0, p3 = 0, pp = 0, z = 0, z1 = 0;
-
-		int n = ngrid;
-		m = (n + 1) / 2;
-		for (i = 0; i < m; i++)
+		temp = 0;
+		for (k = 0; k < Nodes * Nodes; k++)
 		{
-			if (i == 0)
-			{
-				z = sqrt(DP(2 * n + 1)) - 1.85575 * pow(DP(2 * n + 1), -0.16667);
-			}
-			else if (i == 1)
-			{
-				z -= 1.14 * pow(DP(n), 0.426) / z;
-			}
-			else if (i == 2)
-			{
-				z = 1.86 * z - 0.86 * x[0];
-			}
-			else if (i == 3)
-			{
-				z = 1.91 * z - 0.91 * x[1];
-			}
-			else
-			{
-				z = 2.0 * z - x[i - 2];
-			}
-			for (its = 0; its < MAXIT; its++)
-			{
-				p1 = PIM4;
-				p2 = 0.0;
-				for (j = 0; j < n; j++)
-				{
-					p3 = p2;
-					p2 = p1;
-					p1 = z * sqrt(2.0 / (j + 1)) * p2 - sqrt(DP(j) / (j + 1)) * p3;
-				}
-				pp = sqrt(DP(2 * n)) * p2;
-				z1 = z;
-				z = z1 - p1 / pp;
-				if (fabs(z - z1) <= EPS)
-					break;
-			}
-			if (its >= MAXIT)
-				printf("too many iterations in gauher");
-			x[i] = z;
-			x[n - 1 - i] = -z;
-			w[i] = 2.0 / (pp * pp);
-			w[n - 1 - i] = w[i];
+			Ptransi[j][k] = transitionMat[j][k];
+			temp += transitionMat[j][k];
 		}
+		std::cout << temp << "\n";
 	}
+}
+// // Gaussian Quadratures.
+// typedef double DP;
+// void gauher(double x[], double w[], int ngrid)
+// {
+// 	const DP EPS = 1.0e-14, PIM4 = 0.7511255444649425;
+// 	const int MAXIT = 10;
+// 	int i, its, j, m;
+// 	DP p1 = 0, p2 = 0, p3 = 0, pp = 0, z = 0, z1 = 0;
+
+// 	int n = ngrid;
+// 	m = (n + 1) / 2;
+// 	for (i = 0; i < m; i++)
+// 	{
+// 		if (i == 0)
+// 		{
+// 			z = sqrt(DP(2 * n + 1)) - 1.85575 * pow(DP(2 * n + 1), -0.16667);
+// 		}
+// 		else if (i == 1)
+// 		{
+// 			z -= 1.14 * pow(DP(n), 0.426) / z;
+// 		}
+// 		else if (i == 2)
+// 		{
+// 			z = 1.86 * z - 0.86 * x[0];
+// 		}
+// 		else if (i == 3)
+// 		{
+// 			z = 1.91 * z - 0.91 * x[1];
+// 		}
+// 		else
+// 		{
+// 			z = 2.0 * z - x[i - 2];
+// 		}
+// 		for (its = 0; its < MAXIT; its++)
+// 		{
+// 			p1 = PIM4;
+// 			p2 = 0.0;
+// 			for (j = 0; j < n; j++)
+// 			{
+// 				p3 = p2;
+// 				p2 = p1;
+// 				p1 = z * sqrt(2.0 / (j + 1)) * p2 - sqrt(DP(j) / (j + 1)) * p3;
+// 			}
+// 			pp = sqrt(DP(2 * n)) * p2;
+// 			z1 = z;
+// 			z = z1 - p1 / pp;
+// 			if (fabs(z - z1) <= EPS)
+// 				break;
+// 		}
+// 		if (its >= MAXIT)
+// 			printf("too many iterations in gauher");
+// 		x[i] = z;
+// 		x[n - 1 - i] = -z;
+// 		w[i] = 2.0 / (pp * pp);
+// 		w[n - 1 - i] = w[i];
+// 	}
+// }

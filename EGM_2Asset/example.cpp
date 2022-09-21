@@ -9,7 +9,7 @@
 #include <math.h>
 #include <algorithm>
 #include "tauchen_multi.cpp"
-
+#include "txt/filename.hpp"
 double pi;
 double rhopar;
 
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 // int main()
 
 {
-
+    std::cout << risk_states[0];
     // int i;
     // // pi = 1;
     // std::cout << "You have entered " << argc
@@ -80,8 +80,4 @@ int main(int argc, char **argv)
     //         strans_nextperiod[i1][i2] = 0;
     //     }
     // }
-
-
-int
-
 }
