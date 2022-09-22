@@ -13,7 +13,7 @@ p_e2 = 0.6
 std_e1 = 0.2
 std_e2 = 0.16
 corr = .9
-m_e = 1
+m_e = 3
 
 
 def CDFSTDNormal_1D(x1):

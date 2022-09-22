@@ -1,4 +1,4 @@
-// Modify the correlation of risky return and labor income
+// Add utility: utility of wealth u(a) instead of u(a')
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,12 +29,13 @@ const int size_portfoliochoice = 100;
 #define index_ARRLL(asset_gridindex, risk_gridindex, risk_pre_gridindex, laborincome_gridindex, laborincome_pre_gridindex) (((laborincome_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome)) + ((laborincome_gridindex) * (size_asset * size_risk * size_risk)) + ((risk_pre_gridindex) * (size_asset * size_risk)) + ((risk_gridindex) * (size_asset)) + (asset_gridindex))
 
 const double kmin = 0.0;
-const double kmax = 300.0;
+const double kmax = 150.0;
 
 const double betapar = 0.9;
 const double alphapar = 0.36;
 const double deltapar = 0.08;
 const double rhopar = 3.0;
+const double rhopar_w = 3.0;
 const double labor = 1.0219882;
 
 const double epsV = 1.0e-8;
@@ -58,6 +59,7 @@ const double r_f = 0.03;
 #define MUc(x) (pow((x), -rhopar))
 #define inv_MU(u) (pow((u), (-(1.0 / rhopar))))
 #define U(x) (pow((x), (1.0 - rhopar)) / (1.0 - rhopar))
+#define Uw(x) (pow((x + 0.01), (1.0 - rhopar_w)) / (1.0 - rhopar_w))
 
 // Grid
 #define inter1d(x1, y1, y2) ((1.0 - (x1)) * (y1) + (x1) * (y2))
@@ -202,6 +204,10 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                                 {
                                     save[index_ARRLLP(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)] = K[0];
                                     VF[index_ARRLLP(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)] = U(cohexo - save[index_ARRLLP(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)]) + (VFendo[index_ARRLLP(0, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)] - U((cohendo[index_ARRLLP(0, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)] - K[0])));
+
+                                    // here is the place: utility of wealth play a role
+
+                                    VF[index_ARRLLP(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)] += Uw(K[0]);
                                 }
 
                                 if (cohexo >= cohendo[index_ARRLLP(0, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)])
@@ -232,6 +238,10 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
                                     save[index_ARRLLP(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)] = inter1d(vfweight, K[igridL], K[igridH]);
 
                                     threshold_ii = min(size_asset - 2, itest);
+
+                                    // here is the place: utility of wealth play a role
+
+                                    VF[index_ARRLLP(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)] += Uw(K[asset_index]);
                                 }
                             }
                         }
@@ -240,6 +250,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
             }
         }
         // std::cout << "rescaling done\n";
+
         for (asset_index = 0; asset_index < size_asset; asset_index++)
         {
             for (risk_index = 0; risk_index < size_risk; risk_index++)
@@ -490,8 +501,8 @@ void SIMULATION(double *save, double *dist, double *capitalout, double K[size_as
 int main()
 {
     // MARGINAL UTILITY, VALUES FUNCTION AND POLICIES //
-    double *VF, *dVF, *save, *cons, *Portfolio;                                // for decision rules
-    double capital1, capital0, PIB, critprice, taxL, welfare, rrate, wagerate; // for equilibrium
+    double *VF, *dVF, *save, *cons, *Portfolio;                                      // for decision rules
+    double capital1, capital0, PIB, critprice, taxL, welfare, rrate, temp, wagerate; // for equilibrium
 
     // Note for users :: please, always use pointers and save your computer's memory ;) == banish all arrays //
     VF = (double *)calloc((ARRLLP_dim), sizeof(double));   // value function
@@ -552,7 +563,8 @@ int main()
                         for (laborincome_pre_index = 0; laborincome_pre_index < size_laborincome; laborincome_pre_index++)
                         {
                             state_current = risk_index * size_risk + laborincome_index;
-                            VF[index_ARRLLP(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)] = U(wagerate * laborincome_states[state_current] + (1 + r_f + pi + risk_states[state_current]) * K[asset_index]); // REQUIERE TO BE INCREASING IN K (the case here)
+                            temp = wagerate * laborincome_states[state_current] + (1 + r_f + pi + risk_states[state_current]) * K[asset_index];
+                            VF[index_ARRLLP(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, portfoliochoice_index)] = U(temp) + Uw(K[asset_index]); // REQUIERE TO BE INCREASING IN K (the case here)
                         }
                         // std::cout << VF[index_ARRLLP(asset_index, risk_index, risk_pre_index, laborincome_index, portfoliochoice_index)] << "\n";
                     }
@@ -603,8 +615,8 @@ int main()
                     for (laborincome_pre_index = 0; laborincome_pre_index < size_laborincome; laborincome_pre_index++)
                     {
                         state_current = risk_index * size_risk + laborincome_index;
-
-                        VF_final[index_ARRLL(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index)] = U(wagerate * laborincome_states[state_current] + (1 + r_f + pi + risk_states[state_current]) * K[asset_index]); // REQUIERE TO BE INCREASING IN K (the case here)
+                        temp = wagerate * laborincome_states[state_current] + (1 + r_f + pi + risk_states[state_current]) * K[asset_index];
+                        VF_final[index_ARRLL(asset_index, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index)] = U(temp) + Uw(K[asset_index]); // REQUIERE TO BE INCREASING IN K (the case here)
                     }
                 }
             }
@@ -655,7 +667,7 @@ int main()
 
     CreateFolder(".\\csv\\");
     CreateFolder(".\\figure\\");
-    std::string common = "14,pe=e-9,std=0.2,premium=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(kmax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "16,pe=e-9,std=0.2,premium=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(kmax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     std::string filename_dist = "csv\\dist" + common;
     std::string filename_policy = "csv\\policy" + common;
     std::string filename_VF = "csv\\VF" + common;

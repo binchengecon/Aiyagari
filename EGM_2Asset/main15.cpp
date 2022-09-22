@@ -1,4 +1,4 @@
-// Modify the correlation of risky return and labor income
+// On top of main14, reduce distribution iteration times
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@ const int size_portfoliochoice = 100;
 #define index_ARRLL(asset_gridindex, risk_gridindex, risk_pre_gridindex, laborincome_gridindex, laborincome_pre_gridindex) (((laborincome_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome)) + ((laborincome_gridindex) * (size_asset * size_risk * size_risk)) + ((risk_pre_gridindex) * (size_asset * size_risk)) + ((risk_gridindex) * (size_asset)) + (asset_gridindex))
 
 const double kmin = 0.0;
-const double kmax = 300.0;
+const double kmax = 150.0;
 
 const double betapar = 0.9;
 const double alphapar = 0.36;
@@ -655,7 +655,7 @@ int main()
 
     CreateFolder(".\\csv\\");
     CreateFolder(".\\figure\\");
-    std::string common = "14,pe=e-9,std=0.2,premium=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(kmax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "15,pe=e-9,std=0.2,premium=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(kmax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     std::string filename_dist = "csv\\dist" + common;
     std::string filename_policy = "csv\\policy" + common;
     std::string filename_VF = "csv\\VF" + common;
