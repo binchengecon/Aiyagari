@@ -326,30 +326,52 @@ def POLICY(VF_final,  dVF_final,  save_final,  VF,  dVF,  save,  Portfolio,  K, 
     return VF_final, dVF_final, save_final, VF, dVF, save, Portfolio
 
 
+
+
+parser = argparse.ArgumentParser(description="values")
+parser.add_argument("--std_e_shock1", type=float, default=0.2)
+parser.add_argument("--std_e_shock2", type=float, default=0.2)
+parser.add_argument("--corr", type=float, default=.8)
+parser.add_argument("--m_e_shock", type=int, default=1)
+parser.add_argument("--p_e_risk", type=float, default=0.0)
+parser.add_argument("--p_e_labor",type=float,default=.6)
+parser.add_argument("--std_e_risk", type=float, default=0.2)
+parser.add_argument("--std_e_labor", type=float, default=0.2)
+parser.add_argument("--m_e_risk", type=int, default=1)
+parser.add_argument("--m_e_labor", type=int, default=1)
+parser.add_argument("--size_asset", type=int, default=100)
+parser.add_argument("--size_portfoliochoice", type=int, default=100)
+parser.add_argument("--kmax", type=float, default=100.0)
+parser.add_argument("--pi", type=float, default=0.005)
+parser.add_argument("--r_f", type=float, default=0.03)
+args = parser.parse_args()
+
+
+
 p_e_shock1 = 0.0
 p_e_shock2 = 0.0
-std_e_shock1 = 0.2
-std_e_shock2 = 0.2
-corr = .8
-m_e_shock = 1
+std_e_shock1 = args.std_e_shock1
+std_e_shock2 = args.std_e_shock2
+corr = args.corr
+m_e_shock = args.m_e_shock
 
 
-p_e_risk = 0.0
-p_e_labor = 0.6
-std_e_risk = 0.2
-std_e_labor = 0.16
-m_e_risk = 1
-m_e_labor = 1
+p_e_risk = args.p_e_risk
+p_e_labor = args.p_e_labor
+std_e_risk = args.std_e_risk
+std_e_labor = args.std_e_labor
+m_e_risk = args.m_e_risk
+m_e_labor = args.m_e_labor
 
 
-size_asset = 100  # number of grid points
+size_asset = args.size_asset  # number of grid points
 size_risk = 2*m_e_risk+1   # number of productivity classes
 size_shock = 2*m_e_shock+1
 size_laborincome = 2*m_e_labor+1
-size_portfoliochoice = 5
+size_portfoliochoice = args.size_portfoliochoice
 
 kmin = 0.0
-kmax = 10.0
+kmax = args.kmax
 
 betapar = 0.9
 alphapar = 0.36
@@ -369,9 +391,8 @@ grmin = (kmin / scale1) - 1.0
 exponen = np.log((kmax / scale1) - grmin) / (size_asset - 1)
 
 
-pi = 0.00005
-corr = 0.999
-r_f = 0.03
+pi = args.pi
+r_f = args.r_f
 
 # Function Definitions:
 
