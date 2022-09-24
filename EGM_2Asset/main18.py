@@ -9,6 +9,7 @@ from tauchen import *
 # from policy18 import *
 # from simulation18 import *
 import argparse
+sys.stdout.flush()
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
