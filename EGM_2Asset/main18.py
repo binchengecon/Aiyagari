@@ -85,7 +85,7 @@ def POLICY(VF_final,  dVF_final,  save_final,  VF,  dVF,  save,  Portfolio,  K, 
                           size_laborincome, size_shock, size_shock, size_shock, size_shock, size_portfoliochoice+1))
         cohendo = np.zeros((size_asset, size_risk, size_risk, size_laborincome,
                            size_laborincome, size_shock, size_shock, size_shock, size_shock, size_portfoliochoice+1))
-        VF_final_old = VF_final
+        VF_final_old = VF_final.copy()
 
         # std::cout << std::setprecision(16) << VF[(5, 5)] << "\n"
         # std::cout << std::setprecision(16) << VFnew[(5, 5)] << "\n"
