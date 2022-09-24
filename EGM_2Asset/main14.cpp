@@ -15,11 +15,11 @@
 #include <windows.h>
 #include <string>
 #include <sstream>
-#include "txt/AR1.hpp"
+#include "txt/AR2.hpp"
 
 const int size_asset = 150; // number of grid points
-const int size_risk = 7;    // number of productivity classes
-const int size_laborincome = 7;
+const int size_risk = 3;    // number of productivity classes
+const int size_laborincome = 3;
 const int size_portfoliochoice = 100;
 
 #define ARRLLP_dim (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * (size_portfoliochoice + 1))
@@ -48,8 +48,8 @@ const double scale1 = 1.6;
 const double grmin = (kmin / scale1) - 1.0;
 const double exponen = log((kmax / scale1) - grmin) / (size_asset - 1);
 
-const double pi = 0.01;
-const double corr = 0.9;
+const double pi = 0.00005;
+const double corr = 0.999;
 const double r_f = 0.03;
 
 // Function Definitions:
@@ -655,7 +655,7 @@ int main()
 
     CreateFolder(".\\csv\\");
     CreateFolder(".\\figure\\");
-    std::string common = "14,pe=e-9,std=0.2,premium=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(kmax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "14,pe=e-9,std=0.01,premium=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(kmax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     std::string filename_dist = "csv\\dist" + common;
     std::string filename_policy = "csv\\policy" + common;
     std::string filename_VF = "csv\\VF" + common;

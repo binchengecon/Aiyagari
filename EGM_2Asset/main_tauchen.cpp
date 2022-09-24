@@ -12,8 +12,7 @@ int main()
 {
     // TRANSITION + STATE Z OF ENTREPRENEURS //
 
-
-    const double p_e = 0.000000001;
+    const double p_e = 0.000000000;
     // const double std_e = 0.01;
     const double std_e = 0.2;
 
