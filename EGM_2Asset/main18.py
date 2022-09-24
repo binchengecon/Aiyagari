@@ -374,7 +374,6 @@ exponen = np.log((kmax / scale1) - grmin) / (size_asset - 1)
 
 
 pi = 0.00005
-corr = 0.999
 r_f = 0.03
 
 # Function Definitions:
