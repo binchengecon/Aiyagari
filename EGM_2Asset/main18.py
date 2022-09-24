@@ -342,7 +342,7 @@ p_e_labor = 0.6
 std_e_risk = 0.2
 std_e_labor = 0.16
 m_e_risk = 0
-m_e_labor = 2
+m_e_labor = 1
 
 
 size_asset = 150  # number of grid points
