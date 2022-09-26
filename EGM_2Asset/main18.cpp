@@ -8,11 +8,11 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <direct.h>
+// #include <direct.h>
 #include <iomanip>
 #include <cmath>
 #include <limits>
-#include <windows.h>
+// #include <windows.h>
 #include <string>
 #include <sstream>
 #include "txt/Shock.hpp"
@@ -22,7 +22,7 @@
 // const int size_shock = 7;
 // const int size_laborincome = 7;
 
-const int size_asset = 7; // number of grid points
+const int size_asset = 20; // number of grid points
 const int size_portfoliochoice = 4;
 
 #define ARRLLRRLLP_dim (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock * size_shock * size_shock * size_shock * (size_portfoliochoice + 1))
@@ -77,13 +77,13 @@ const double r_f = 0.03;
 
 double K[size_asset], Omega[size_portfoliochoice + 1];
 
-void CreateFolder(const char *path)
-{
-    if (!CreateDirectory(path, NULL))
-    {
-        return;
-    }
-}
+// void CreateFolder(const char *path)
+// {
+//     if (!CreateDirectory(path, NULL))
+//     {
+//         return;
+//     }
+// }
 
 void copy(double *VectorIN, double *VectorOUT, int dim)
 {
@@ -906,8 +906,8 @@ int main()
     //     std::cout << "\n";
     // }
 
-    CreateFolder(".\\csv\\");
-    CreateFolder(".\\figure\\");
+    // CreateFolder(".\\csv\\");
+    // CreateFolder(".\\figure\\");
     std::string common = "18,pe=e-9,std=0.01,premium=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(kmax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     std::string filename_dist = "csv\\dist" + common;
     std::string filename_policy = "csv\\policy" + common;

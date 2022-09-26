@@ -511,19 +511,24 @@ with open('./txt/Risk_Labor.hpp', 'w') as f:
 
     print("};\n")
 
-    print("const double  risk_pre_trans[{:d}][{:d}] = {{\n".format(
-        1, len(grid_risk)), end="")
+    print("const  double risk_pre_trans[{:d}][{:d}] = {{\n".format(
+        ytrans_risk.shape[0], ytrans_risk.shape[1]), end="")
 
-    print("{", end="")
-    for k in list(range(len(grid_risk))):
+    for y in list(range(ytrans_risk.shape[0])):
+        print("{", end="")
+        for k in list(range(ytrans_risk.shape[1])):
 
-        if (k < len(grid_risk) - 1):
-            print("{:.15f}, ".format(ytrans_risk[0, k]), end="")
+            if (k < ytrans_risk.shape[1] - 1):
+                print("{:.15f}, ".format(ytrans_risk[y, k]), end="")
+            else:
+                print("{:.15f}".format(ytrans_risk[y, k]), end="")
+
+        if (y < ytrans_risk.shape[0] - 1):
+            print("},\n", end="")
         else:
-            print("{:.15f}".format(ytrans_risk[0, k]), end="")
-
-    print("}};", end="")
+            print("}};", end="")
     print("\n")
+
 
     print("const double  laborincome_pre_trans[{:d}][{:d}] = {{\n".format(
         len(grid_labor), len(grid_labor)), end="")
