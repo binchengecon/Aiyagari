@@ -3,14 +3,14 @@
 
 ######## login 
 #SBATCH --job-name=main18_test
-#SBATCH --output=./job-outs/main18_test.out
-#SBATCH --error=./job-outs/main18_test.err
+#SBATCH --output=./job-outs/main18_3.out
+#SBATCH --error=./job-outs/main18_3.err
 
 
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=standard
 #SBATCH --cpus-per-task=3
-#SBATCH --mem=12G
+#SBATCH --mem=36G
 #SBATCH --time=7-00:00:00
 
 ####### load modules

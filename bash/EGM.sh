@@ -32,8 +32,24 @@
 # count=0
 
 
-projectname="EGM_2Asset"
 
+projectname="EGM_2Asset"
+std_e_shock1arr = 
+std_e_shock2arr = 
+corrarr = 
+m_e_shockarr = 
+p_e_riskarr = 
+p_e_laborarr = 
+p_e_laborarr = 
+std_e_riskarr = 
+std_e_laborarr = 
+m_e_riskarr = 
+m_e_laborarr = 
+size_assetarr = 
+size_portfoliochoicearr = 
+size_portfoliochoicearr = 
+piarr = 
+r_farr = 
 
 for k in $(seq 0 $LENGTH_psi) 
 do
