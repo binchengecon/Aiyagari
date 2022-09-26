@@ -14,15 +14,15 @@ p_e_shock2 = 0.0
 std_e_shock1 = 0.2
 std_e_shock2 = 0.2
 corr = .8
-m_e_shock = 3
+m_e_shock = 1
 
 
 p_e_risk = 0.0
 p_e_labor = 0.6
 std_e_risk = 0.2
 std_e_labor = 0.16
-m_e_risk = 0
-m_e_labor = 3
+m_e_risk = 1
+m_e_labor = 1
 
 
 def CDFSTDNormal_1D(x1):
@@ -310,7 +310,7 @@ def tauchenfun1D(rho, m,  amu, sigma):
 
     if rho == 0:
         transitionMat_vec = np.reshape(transitionMat[0, :], (1, Nodes))
-        return grid, transitionMat_vec
+        return grid, transitionMat
     else:
         return grid, transitionMat
 
@@ -380,7 +380,28 @@ with open('./txt/Shock.hpp', 'w') as f:
             print("}};", end="")
     print("\n")
 
+    print("const  double  risk_labor_shock_pre_trans[{:d}][{:d}] = {{\n".format(
+        ytrans.shape[0], ytrans.shape[1]), end="")
+
+    for y in list(range(ytrans.shape[0])):
+        print("{", end="")
+        for k in list(range(ytrans.shape[1])):
+
+            if (k < ytrans.shape[1] - 1):
+                print("{:.15f}, ".format(ytrans[y, k]), end="")
+            else:
+                print("{:.15f}".format(ytrans[y, k]), end="")
+
+        if (y < ytrans.shape[0] - 1):
+            print("},\n", end="")
+        else:
+            print("}};", end="")
+    print("\n")
+
     # print("};\n", end="")
+
+    print("const  int  size_shock={:d}; \n".format(
+        2*m_e_shock+1), end="")
 
     sys.stdout = original_stdout  # Reset the standard output to its original value
 
@@ -522,4 +543,9 @@ with open('./txt/Risk_Labor.hpp', 'w') as f:
             print("}};", end="")
     print("\n")
 
+    print("const int  size_laborincome = {:d}; \n".format(
+        len(grid_labor)), end="")
+
+    print("const int  size_risk = {:d}; \n".format(
+        len(grid_risk)), end="")
     sys.stdout = original_stdout  # Reset the standard output to its original value

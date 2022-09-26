@@ -12,6 +12,18 @@
 #include "txt/filename.hpp"
 double pi;
 double rhopar;
+const int size_asset = 150; // number of grid points
+const int size_portfoliochoice = 100;
+const int size_shock = 3;
+
+const int size_laborincome = 3;
+const int size_risk = 1;
+
+#define ARRLLP_dim (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * (size_portfoliochoice + 1))
+#define ARRLL_dim (size_asset * size_risk * size_risk * size_laborincome * size_laborincome)
+
+#define index_ARRLLP(asset_gridindex, risk_gridindex, risk_pre_gridindex, laborincome_gridindex, laborincome_pre_gridindex, portfoliochoice_gridindex) (((portfoliochoice_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome)) + ((laborincome_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome)) + ((laborincome_gridindex) * (size_asset * size_risk * size_risk)) + ((risk_pre_gridindex) * (size_asset * size_risk)) + ((risk_gridindex) * (size_asset)) + (asset_gridindex))
+#define index_ARRLL(asset_gridindex, risk_gridindex, risk_pre_gridindex, laborincome_gridindex, laborincome_pre_gridindex) (((laborincome_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome)) + ((laborincome_gridindex) * (size_asset * size_risk * size_risk)) + ((risk_pre_gridindex) * (size_asset * size_risk)) + ((risk_gridindex) * (size_asset)) + (asset_gridindex))
 
 #define U(x) (pow((x), (1.0 - rhopar)) / (1.0 - rhopar))
 // int main()
@@ -22,11 +34,26 @@ double rhopar;
 //     policyfilecsv.open(var);
 // }
 
+#define ARRLLRRLLP_dim (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock * size_shock * size_shock * size_shock * (size_portfoliochoice + 1))
+#define ARRLLRRLL_dim (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock * size_shock * size_shock * size_shock)
+
+#define index_ARRLLRRLLP(asset_gridindex, risk_gridindex, risk_pre_gridindex, laborincome_gridindex, laborincome_pre_gridindex, riskshock_gridindex, riskshock_pre_gridindex, laborshock_gridindex, laborshock_pre_gridindex, portfoliochoice_gridindex) (((portfoliochoice_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock * size_shock * size_shock * size_shock)) + ((laborshock_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock * size_shock * size_shock)) + ((laborshock_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock * size_shock)) + ((riskshock_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock)) + ((riskshock_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome)) + ((laborincome_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome)) + ((laborincome_gridindex) * (size_asset * size_risk * size_risk)) + ((risk_pre_gridindex) * (size_asset * size_risk)) + ((risk_gridindex) * (size_asset)) + (asset_gridindex))
+#define index_ARRLLRRLL(asset_gridindex, risk_gridindex, risk_pre_gridindex, laborincome_gridindex, laborincome_pre_gridindex, riskshock_gridindex, riskshock_pre_gridindex, laborshock_gridindex, laborshock_pre_gridindex) (((laborshock_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock * size_shock * size_shock)) + ((laborshock_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock * size_shock)) + ((riskshock_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock)) + ((riskshock_gridindex) * (size_asset * size_risk * size_risk * size_laborincome * size_laborincome)) + ((laborincome_pre_gridindex) * (size_asset * size_risk * size_risk * size_laborincome)) + ((laborincome_gridindex) * (size_asset * size_risk * size_risk)) + ((risk_pre_gridindex) * (size_asset * size_risk)) + ((risk_gridindex) * (size_asset)) + (asset_gridindex))
+
+void null(double *VectorIN, int dim)
+{
+    int asset_index;
+    for (asset_index = 0; asset_index < dim; asset_index++)
+    {
+        VectorIN[asset_index] = 0;
+    }
+}
+
 int main(int argc, char **argv)
 // int main()
 
 {
-    std::cout << risk_states[0];
+    // std::cout << risk_states[0];
     // int i;
     // // pi = 1;
     // std::cout << "You have entered " << argc
@@ -80,4 +107,14 @@ int main(int argc, char **argv)
     //         strans_nextperiod[i1][i2] = 0;
     //     }
     // }
+    int shockstate_pre, shockstate_current, shockstate_next, asset_index, ii, risk_index, risk_indexnext, risk_pre_index, risk_pre_indexnext, laborincome_index, laborincome_indexnext, laborincome_pre_index, laborincome_pre_indexnext, riskshock_index, riskshock_indexnext, riskshock_pre_index, riskshock_pre_indexnext, laborshock_index, laborshock_indexnext, laborshock_pre_index, laborshock_pre_indexnext, portfoliochoice_index, iter, threshold_ii, Icase, itest, igridL, igridH, itemp;
+    double *VF;
+    // VF = (double *)calloc((ARRLLRRLLP_dim), sizeof(double)); // value function
+    VF = (double *)calloc((ARRLLP_dim), sizeof(double)); // value function
+    null(VF, ARRLLP_dim);
+
+    std::cout << index_ARRLLP(0, 0, 0, 0, 0, 0);
+    std::cout << VF[index_ARRLLP(0, 0, 0, 0, 0, 0)];
+    std::cout << VF[0];
+    // VF[index_ARRLLRRLLP(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)];
 }

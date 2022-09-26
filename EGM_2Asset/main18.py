@@ -1,5 +1,7 @@
 # Modify the correlation of risky return and labor income
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import sys
 from xml.dom.minicompat import NodeList
 from scipy.stats import multivariate_normal as mvn
@@ -11,8 +13,6 @@ from tauchen import *
 import argparse
 sys.stdout.flush()
 
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 
 mpl.rcParams["lines.linewidth"] = 1
 mpl.rcParams["savefig.bbox"] = "tight"
