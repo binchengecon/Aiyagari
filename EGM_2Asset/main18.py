@@ -326,7 +326,7 @@ def POLICY(VF_final,  dVF_final,  save_final,  VF,  dVF,  save,  Portfolio,  K, 
                                                                                                                                                                                                                                                                               riskshock_index, riskshock_pre_index, laborshock_index, laborshock_pre_index, portfoliochoice_index)]) / (K[size_asset - 1] - K[size_asset - 2])
 
         iter += 1
-        print("iteration={:d}, critV={:.8f}".format(iter, critV))
+        print("iteration={:d}, critV={:.8f}".format(iter, critV),flush=True)
     return VF_final, dVF_final, save_final, VF, dVF, save, Portfolio
 
 
@@ -396,6 +396,8 @@ laborincome_states, laborincome_trans = tauchenfun1D(
 laborincome_states = np.exp(laborincome_states)
 laborshock_states = np.exp(laborshock_states)
 riskshock_states = np.exp(riskshock_states)
+
+print("Tauchen Done",flush=True)
 # MARGINAL UTILITY, VALUES FUNCTION AND POLICIES #
 
 # print(risk_trans.shape)
@@ -515,10 +517,10 @@ for asset_index in list(range(size_asset)):
                                     dVF_final[(size_asset - 1, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, riskshock_index, riskshock_pre_index, laborshock_index, laborshock_pre_index)] = (VF_final[(size_asset - 1, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, riskshock_index,
                                                                                                                                                                                                                                  riskshock_pre_index, laborshock_index, laborshock_pre_index)] - VF_final[(size_asset - 2, risk_index, risk_pre_index, laborincome_index, laborincome_pre_index, riskshock_index, riskshock_pre_index, laborshock_index, laborshock_pre_index)]) / (K[size_asset - 1] - K[size_asset - 2])
 
-print("Policy Computation Start")
+print("Policy Computation Start",flush=True)
 VF_final, dVF_final, save_final, VF, dVF, save, Portfolio = POLICY(VF_final, dVF_final, save_final, VF,
                                                                    dVF, save, Portfolio, K, Omega, wagerate)
-print("Policy Computation Done")
+print("Policy Computation Done",flush=True)
 
 
 file_name = "test"
