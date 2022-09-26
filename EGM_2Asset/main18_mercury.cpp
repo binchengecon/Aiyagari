@@ -22,7 +22,7 @@
 // const int size_shock = 7;
 // const int size_laborincome = 7;
 
-const int size_asset = 5; // number of grid points
+const int size_asset = 20; // number of grid points
 const int size_portfoliochoice = 4;
 
 #define ARRLLRRLLP_dim (size_asset * size_risk * size_risk * size_laborincome * size_laborincome * size_shock * size_shock * size_shock * size_shock * (size_portfoliochoice + 1))
@@ -507,7 +507,7 @@ void POLICY(double *VF_final, double *dVF_final, double *save_final, double *VF,
         iter++;
         // std::cout << critV;
         std::cout
-            << "iteration=" << iter << ", critV=" << critV << "\n";
+            << "iteration=" << iter << ", critV=" << critV << "\n"<< std::flush;
     }
 
 
@@ -635,7 +635,7 @@ void SIMULATION(double *save, double *dist, double *capitalout, double K[size_as
 
         iter++;
     }
-    std::cout << "iteration=" << iter << ", critdist=" << critdist << ", distverify=" << distverif << "\n";
+    std::cout << "iteration=" << iter << ", critdist=" << critdist << ", distverify=" << distverif << "\n"<< std::flush;
 
     // *capitalout = 0.0;
 
@@ -875,11 +875,14 @@ int main()
     // CreateFolder(".\\csv\\");
     // CreateFolder(".\\figure\\");
     std::string common = "18,pe=e-9,std=0.01,premium=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(kmax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
-    std::string filename_dist = ".//csv//dist" + common;
-    std::string filename_policy = ".//csv//policy" + common;
-    std::string filename_VF = ".//csv//VF" + common;
-    std::string filename_Port = ".//csv//Portfolio" + common;
-
+    // std::string filename_dist = ".//csv//dist" + common;
+    // std::string filename_policy = ".//csv//policy" + common;
+    // std::string filename_VF = ".//csv//VF" + common;
+    // std::string filename_Port = ".//csv//Portfolio" + common;
+    std::string filename_dist = "dist" + common;
+    std::string filename_policy = "policy" + common;
+    std::string filename_VF = "VF" + common;
+    std::string filename_Port = "Portfolio" + common;
     // std::string var = "sometext" + std::to_string(pi);
     // std::cout << var;
 
