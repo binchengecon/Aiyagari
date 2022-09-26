@@ -875,10 +875,10 @@ int main()
     // CreateFolder(".\\csv\\");
     // CreateFolder(".\\figure\\");
     std::string common = "18,pe=e-9,std=0.01,premium=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(kmax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
-    std::string filename_dist = "./csv/dist" + common;
-    std::string filename_policy = "./csv/policy" + common;
-    std::string filename_VF = "./csv/VF" + common;
-    std::string filename_Port = "./csv/Portfolio" + common;
+    std::string filename_dist = ".//csv//dist" + common;
+    std::string filename_policy = ".//csv//policy" + common;
+    std::string filename_VF = ".//csv//VF" + common;
+    std::string filename_Port = ".//csv//Portfolio" + common;
 
     // std::string var = "sometext" + std::to_string(pi);
     // std::cout << var;
