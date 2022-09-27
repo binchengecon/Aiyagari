@@ -538,7 +538,7 @@ for risk_index in list(range(size_risk)):
                                 plt.ylim((0, 1))
                                 plt.xlim((0, kmax))
 # plt.show()
-plt.savefig("./figure/"+file_name+".pdf")
+plt.savefig("./EGM_2Asset/figure/"+file_name+".pdf")
 plt.close()
 
 # SIMULATION(save_final, distin_final, & capital1, K)
