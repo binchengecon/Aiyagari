@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:calib_functions">
+   </FileRef>
+   <FileRef
+      location = "group:misc_functions">
+   </FileRef>
+   <FileRef
+      location = "group:OUTPUT">
+   </FileRef>
+   <FileRef
+      location = "group:header.hpp">
+   </FileRef>
+   <FileRef
+      location = "group:main.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:calibration.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:steady_state.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:POLICY.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:SIMULATION.cpp">
+   </FileRef>
+   <Group
+      location = "container:"
+      name = "Compiler">
+      <FileRef
+         location = "group:build.command">
+      </FileRef>
+      <FileRef
+         location = "group:build_intel.command">
+      </FileRef>
+   </Group>
+</Workspace>
