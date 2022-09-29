@@ -109,12 +109,13 @@ int main(int argc, char **argv)
     // }
     int shockstate_pre, shockstate_current, shockstate_next, asset_index, ii, risk_index, risk_indexnext, risk_pre_index, risk_pre_indexnext, laborincome_index, laborincome_indexnext, laborincome_pre_index, laborincome_pre_indexnext, riskshock_index, riskshock_indexnext, riskshock_pre_index, riskshock_pre_indexnext, laborshock_index, laborshock_indexnext, laborshock_pre_index, laborshock_pre_indexnext, portfoliochoice_index, iter, threshold_ii, Icase, itest, igridL, igridH, itemp;
     double *VF;
-    // VF = (double *)calloc((ARRLLRRLLP_dim), sizeof(double)); // value function
-    VF = (double *)calloc((ARRLLP_dim), sizeof(double)); // value function
+    VF = (double *)calloc((ARRLLRRLLP_dim * 100), sizeof(double)); // value function
+    // VF = (double *)calloc((ARRLLP_dim), sizeof(double)); // value function
     null(VF, ARRLLP_dim);
+    std::cout << ARRLLRRLLP_dim* 100 << std::endl;
 
-    std::cout << index_ARRLLP(0, 0, 0, 0, 0, 0);
-    std::cout << VF[index_ARRLLP(0, 0, 0, 0, 0, 0)];
-    std::cout << VF[0];
+    std::cout << index_ARRLLP(0, 0, 0, 0, 0, 0) << std::endl;
+    std::cout << VF[index_ARRLLP(0, 0, 0, 0, 0, 11)] << std::endl;
+    std::cout << VF[0] << std::endl;
     // VF[index_ARRLLRRLLP(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)];
 }

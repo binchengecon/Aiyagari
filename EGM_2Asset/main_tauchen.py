@@ -13,7 +13,7 @@ p_e_shock1 = 0.0
 p_e_shock2 = 0.0
 std_e_shock1 = 0.2
 std_e_shock2 = 0.2
-corr = .8
+corr = 1
 m_e_shock = 2
 
 

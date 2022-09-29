@@ -15,11 +15,11 @@
 #include <windows.h>
 #include <string>
 #include <sstream>
-#include "txt/Shock.hpp"
+#include "txt/Shock_alex.hpp"
 #include "txt/Risk_Labor.hpp"
 
-const int size_asset = 200; // number of grid points
-const int size_portfoliochoice = 50;
+const int size_asset = 500; // number of grid points
+const int size_portfoliochoice = 100;
 
 const double Amin = 0.0;
 const double Amax = 500.0;
@@ -27,7 +27,7 @@ const double Amax = 500.0;
 const double COHmin = 0.0;
 const double COHmax = 500.0;
 
-const double betapar = 0.9;
+const double betapar = 0.7;
 const double alphapar = 0.36;
 const double deltapar = 0.08;
 const double rhopar = 1.5;
@@ -92,19 +92,18 @@ void null(double *VectorIN, int dim)
 double FOC_Port(double omega, int y, int t, int i, double *G_VF, double A[size_asset], double COH[size_asset], double wagerate)
 {
     double G_V_next, weight, COHnext, EG_V = 0.0;
-    int icoh, riskshock_index, laborshock_index, shockstate_current;
+    int icoh, riskshock_index, laborshock_index, shockstate_current,z;
 
     // constrain individuals to invest if they generate negative wealth!
     // computing the next period certainty equivalent operator.
 
-    for (riskshock_index = 0; riskshock_index < size_shock; riskshock_index++)
+    for (z = 0; z < length_z; z++)
     {
-        for (laborshock_index = 0; laborshock_index < size_shock; laborshock_index++)
-        {
-            shockstate_current = riskshock_index * size_shock + laborshock_index;
+
 
             // COHnext = (1.0 + (r_f + pi + risk_states[t]) * risk_shock_states[shockstate_current] * omega + r_f * (1 - omega)) * A[i] + wagerate * laborincome_states[y] * laborincome_shock_states[shockstate_current];
-            COHnext = ((1.0 + r_f + pi) * risk_states[t] * risk_shock_states[shockstate_current] * omega + (1 + r_f) * (1 - omega)) * A[i] + wagerate * laborincome_states[y] * laborincome_shock_states[shockstate_current];
+            // COHnext = ((1.0 + r_f + pi) * risk_states[t] * risk_shock_states[shockstate_current] * omega + (1 + r_f) * (1 - omega)) * A[i] + wagerate * laborincome_states[y] * laborincome_shock_states[shockstate_current];
+            COHnext = ((1.0 + r_f + pi) * risk_states[t] * ZR[z] * omega + (1 + r_f) * (1 - omega)) * A[i] + wagerate * laborincome_states[y] * ZY[z];
 
             icoh = max(0, min((int)(floor(getgrid(COHnext))), size_asset - 2));
             weight = (COHnext - COH[icoh]) / (COH[icoh + 1] - COH[icoh]);
@@ -120,8 +119,9 @@ double FOC_Port(double omega, int y, int t, int i, double *G_VF, double A[size_a
 
             // correct for bounds.
             G_V_next = inter1d(weight, G_VF[index(icoh, y, t)], G_VF[index(icoh + 1, y, t)]); // next period VF.
-            EG_V += risk_labor_shock_trans[0][shockstate_current] * G_V_next;
-        }
+            // EG_V += risk_labor_shock_trans[0][shocstate_current] * G_V_next;
+            EG_V += TZ[z] * G_V_next;
+
     }
 
     return (EG_V);
@@ -398,7 +398,7 @@ int main()
     printf("Policy Computation Start\n");
     POLICY(VF, dVF, save, cons, Portfolio, A, COH, Omega, wagerate);
     printf("Policy Computation Done\n");
-    std::string common = "19,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "19_alex,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     // std::string common = "19.csv ";
 
     std::string filename_Port = ".\\csv\\Portfolio" + common;
