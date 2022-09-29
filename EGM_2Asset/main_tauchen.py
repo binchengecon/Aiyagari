@@ -14,15 +14,15 @@ p_e_shock2 = 0.0
 std_e_shock1 = 0.2
 std_e_shock2 = 0.2
 corr = .8
-m_e_shock = 1
+m_e_shock = 2
 
 
 p_e_risk = 0.0
 p_e_labor = 0.6
-std_e_risk = 0.2
+std_e_risk = 0.01
 std_e_labor = 0.16
-m_e_risk = 1
-m_e_labor = 1
+m_e_risk = 2
+m_e_labor = 2
 
 
 def CDFSTDNormal_1D(x1):
@@ -419,14 +419,25 @@ with open('./txt/Risk_Labor.hpp', 'w') as f:
 
     print("const double  risk_states[{:d}] ={{".format(len(grid_risk)), end="")
 
+    # for y in range(len(grid_risk)):
+
+    #     # print("{:.15f}\t".format(grid1[y]))
+
+    #     if (y < len(grid_risk) - 1):
+    #         print("{:.15f}, ".format(grid_risk[y]), end="")
+    #     else:
+    #         print("{:.15f}".format(grid_risk[y]), end="")
+
+    # print("};\n")
+
     for y in range(len(grid_risk)):
 
         # print("{:.15f}\t".format(grid1[y]))
 
         if (y < len(grid_risk) - 1):
-            print("{:.15f}, ".format(grid_risk[y]), end="")
+            print("exp({:.15f}), ".format(grid_risk[y]), end="")
         else:
-            print("{:.15f}".format(grid_risk[y]), end="")
+            print("exp({:.15f})".format(grid_risk[y]), end="")
 
     print("};\n")
 
@@ -528,7 +539,6 @@ with open('./txt/Risk_Labor.hpp', 'w') as f:
         else:
             print("}};", end="")
     print("\n")
-
 
     print("const double  laborincome_pre_trans[{:d}][{:d}] = {{\n".format(
         len(grid_labor), len(grid_labor)), end="")
