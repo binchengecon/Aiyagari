@@ -22,7 +22,7 @@ def graph(file_name):
 
     plt.plot(data[:, 1], data[:, 2:])
     plt.ylim((0, 1))
-    # plt.xlim((0, 300))
+    # plt.xlim((0.01, 40))
     # plt.show()
     plt.savefig("./figure/"+file_name+".pdf")
     plt.close()
@@ -138,12 +138,32 @@ file_name_string.append(
     "Portfolio19,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=3.000000,Ksize=100,Kmax=200.000000,relaxVF=0.000000,beta=0.800000,corr=0.800000,Ssize=5")
 file_name_string.append(
     "Portfolio19,pi=0.030000,wage=0.800000,rf=0.040000,Psize=100,rho_c=1.500000,Ksize=500,Kmax=500.000000,relaxVF=0.000000,beta=0.900000,corr=0.800000,Ssize=5")
-file_name_string.append("Portfolio19,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.900000,corr=0.800000,Ssize=5")
-file_name_string.append("Portfolio19_alex,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,Ksize=300,Kmax=500.000000,relaxVF=0.000000,beta=0.900000,corr=1.000000,Ssize=5")
-file_name_string.append("Portfolio19_alex,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,Ksize=300,Kmax=500.000000,relaxVF=0.000000,beta=0.800000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio19,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.900000,corr=0.800000,Ssize=5")
+file_name_string.append(
+    "Portfolio19_alex,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,Ksize=300,Kmax=500.000000,relaxVF=0.000000,beta=0.900000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio19_alex,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,Ksize=300,Kmax=500.000000,relaxVF=0.000000,beta=0.800000,corr=1.000000,Ssize=5")
 
 
-file_name_string.append("Portfolio19_alex,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,Ksize=300,Kmax=500.000000,relaxVF=0.000000,beta=0.500000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio19_alex,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,Ksize=300,Kmax=500.000000,relaxVF=0.000000,beta=0.500000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio20,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=1.500000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.800000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio20,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.800000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio20,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=5.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.800000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio20,pi=0.030000,wage=0.800000,rf=0.040000,Psize=50,rho_c=3.000000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.750000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio20_change,pi=0.030000,wage=1.800000,rf=0.040000,Psize=50,rho_c=4.000000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.750000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio21old,pi=0.030000,wage=1.800000,rf=0.040000,Psize=100,rho_c=1.500000,rho_w=3.000000,Ksize=500,Kmax=500.000000,relaxVF=0.000000,beta=0.750000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio21noextra,pi=0.030000,wage=1.800000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.750000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio21noextra,pi=0.030000,wage=1.800000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.750000,corr=1.000000,Ssize=5")
 graph(file_name_string[-1])
 
 

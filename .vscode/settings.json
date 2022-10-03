@@ -57,6 +57,7 @@
         "vector": "cpp",
         "xlocbuf": "cpp",
         "xlocmes": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "complex": "cpp"
     }
 }
