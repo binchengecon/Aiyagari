@@ -20,8 +20,9 @@ m_e_shock = 2
 p_e_risk = 0.0
 p_e_labor = 0.6
 std_e_risk = 0.01
-std_e_labor = 0.16
-m_e_risk = 2
+# std_e_labor = 0.16
+std_e_labor = 0.25
+m_e_risk = 1
 m_e_labor = 2
 
 
@@ -563,4 +564,8 @@ with open('./txt/Risk_Labor.hpp', 'w') as f:
 
     print("const int  size_risk = {:d}; \n".format(
         len(grid_risk)), end="")
+
+    print("const double  std_labor = {:f}; \n".format(
+        std_e_labor), end="")
+
     sys.stdout = original_stdout  # Reset the standard output to its original value

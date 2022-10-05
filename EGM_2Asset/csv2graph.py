@@ -164,6 +164,13 @@ file_name_string.append(
     "Portfolio21noextra,pi=0.030000,wage=1.800000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.750000,corr=1.000000,Ssize=5")
 file_name_string.append(
     "Portfolio21noextra,pi=0.030000,wage=1.800000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.750000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio21noextra_save,pi=0.000000,wage=1.000000,std_l=0.250000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.920000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio21nouti,pi=0.000000,wage=1.000000,std_l=0.250000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.920000,corr=1.000000,Ssize=5")
+file_name_string.append(
+    "Portfolio21nouti,pi=0.000000,wage=1.000000,std_l=0.250000,rf=0.040000,Psize=50,rho_c=1.500000,rho_w=3.000000,Ksize=200,Kmax=500.000000,relaxVF=0.000000,beta=0.920000,corr=1.000000,Ssize=1")
+
 graph(file_name_string[-1])
 
 

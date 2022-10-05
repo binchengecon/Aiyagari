@@ -27,7 +27,7 @@ const double Amax = 500.0;
 const double COHmin = 0.0;
 const double COHmax = 500.0;
 
-const double betapar = 0.92;
+const double betapar = 0.75;
 const double alphapar = 0.36;
 const double deltapar = 0.08;
 const double rhopar = 1.5;
@@ -45,10 +45,10 @@ const double scale1 = 1.6;
 const double grmin = (Amin / scale1) - 1.0;
 const double exponen = log((Amax / scale1) - grmin) / (size_asset - 1);
 
-const double pi = 0.00;
+const double pi = 0.03;
 const double corr = 1;
 const double r_f = 0.04;
-const double wagerate = 1.0;
+const double wagerate = 1.8;
 
 // grid space for value
 #define RL_dim (size_laborincome * size_risk)
@@ -93,88 +93,52 @@ void null(double *VectorIN, int dim)
     }
 }
 
+
 double FOC_Port(double omega, int y, int t, int i, double *G_VF, double A[size_asset], double COH[size_asset], double wagerate)
 {
-    double G_V_next, weight, COHnext, EG_V = 0.0;
+    double G_V_next, weight, COHnext, EG_V = 0.0, correct = 0.0;
     int icoh, riskshock_index, laborshock_index, shockstate_current, z;
 
     // constrain individuals to invest if they generate negative wealth!
     // computing the next period certainty equivalent operator.
+    for (z = 0; z < length_z; z++)
+    {
+        correct += TZ[z];
+    }
 
     for (z = 0; z < length_z; z++)
     {
 
-        // COHnext = (1.0 + (r_f + pi + risk_states[t]) * risk_shock_states[shockstate_current] * omega + r_f * (1 - omega)) * A[i] + wagerate * laborincome_states[y] * laborincome_shock_states[shockstate_current];
-        // COHnext = ((1.0 + r_f + pi) * risk_states[t] * risk_shock_states[shockstate_current] * omega + (1 + r_f) * (1 - omega)) * A[i] + wagerate * laborincome_states[y] * laborincome_shock_states[shockstate_current];
         COHnext = ((1.0 + r_f + pi) * risk_states[t] * ZR[z] * omega + (1 + r_f) * (1 - omega)) * A[i] + wagerate * laborincome_states[y] * ZY[z];
 
-        icoh = max(0, min((int)(floor(getgrid(COHnext))), size_asset - 2));
-        weight = (COHnext - COH[icoh]) / (COH[icoh + 1] - COH[icoh]);
-        if (weight > 1)
+        if (COHnext < COH[size_asset - 1])
         {
-            weight = 1.0 + (weight - 1.0) / 1.2;
-        } // this is a small correction for potential approx in the extrapolation at the top.
-        if (icoh < 0 | weight < 0.0)
-        {
-            printf("mistake: %d %f psinext = %f", icoh, weight, COHnext);
-            getchar();
+            icoh = min((int)(floor(getgrid(COHnext))), size_asset - 2);
+            weight = (COHnext - COH[icoh]) / (COH[icoh + 1] - COH[icoh]);
+
+            if (weight < 0 || weight > 1)
+            {
+                printf("mistake weight <0: isave= %d, weight = %10.1f, coh= %20.5f\n", icoh, weight, COHnext);
+            }
+
+            // correct for bounds.
+            G_V_next = inter1d(weight, G_VF[index(icoh, y, t)], G_VF[index(icoh + 1, y, t)]); // next period VF.
+            // EG_V += risk_labor_shock_trans[0][shocstate_current] * G_V_next;
+            EG_V += TZ[z] / correct * G_V_next;
         }
 
-        // correct for bounds.
-        G_V_next = inter1d(weight, G_VF[index(icoh, y, t)], G_VF[index(icoh + 1, y, t)]); // next period VF.
-        // EG_V += risk_labor_shock_trans[0][shocstate_current] * G_V_next;
-        EG_V += TZ[z] * G_V_next;
+        if (COHnext >= COH[size_asset - 1])
+        {
+            weight = 1 / 2;
+            G_V_next = inter1d(weight, G_VF[index(size_asset - 2, y, t)], G_VF[index(size_asset - 1, y, t)]); // next period VF.
+            // EG_V += risk_labor_shock_trans[0][shocstate_current] * G_V_next;
+            EG_V += TZ[z] / correct * G_V_next;
+        }
     }
 
     EG_V += Uw(A[i]);
     return (EG_V);
 }
-
-// double FOC_Port(double omega, int y, int t, int i, double *G_VF, double A[size_asset], double COH[size_asset], double wagerate)
-// {
-//     double G_V_next, weight, COHnext, EG_V = 0.0, correct = 0.0;
-//     int icoh, riskshock_index, laborshock_index, shockstate_current, z;
-
-//     // constrain individuals to invest if they generate negative wealth!
-//     // computing the next period certainty equivalent operator.
-//     for (z = 0; z < length_z; z++)
-//     {
-//         correct += TZ[z];
-//     }
-
-//     for (z = 0; z < length_z; z++)
-//     {
-
-//         COHnext = ((1.0 + r_f + pi) * risk_states[t] * ZR[z] * omega + (1 + r_f) * (1 - omega)) * A[i] + wagerate * laborincome_states[y] * ZY[z];
-
-//         if (COHnext < COH[size_asset - 1])
-//         {
-//             icoh = min((int)(floor(getgrid(COHnext))), size_asset - 2);
-//             weight = (COHnext - COH[icoh]) / (COH[icoh + 1] - COH[icoh]);
-
-//             if (weight < 0 || weight > 1)
-//             {
-//                 printf("mistake weight <0: isave= %d, weight = %10.1f, coh= %20.5f\n", icoh, weight, COHnext);
-//             }
-
-//             // correct for bounds.
-//             G_V_next = inter1d(weight, G_VF[index(icoh, y, t)], G_VF[index(icoh + 1, y, t)]); // next period VF.
-//             // EG_V += risk_labor_shock_trans[0][shocstate_current] * G_V_next;
-//             EG_V += TZ[z] / correct * G_V_next;
-//         }
-
-//         if (COHnext >= COH[size_asset - 1])
-//         {
-//             weight = 1 / 2;
-//             G_V_next = inter1d(weight, G_VF[index(size_asset - 2, y, t)], G_VF[index(size_asset - 1, y, t)]); // next period VF.
-//             // EG_V += risk_labor_shock_trans[0][shocstate_current] * G_V_next;
-//             EG_V += TZ[z] / correct * G_V_next;
-//         }
-//     }
-
-//     EG_V += Uw(A[i]);
-//     return (EG_V);
-// }
 
 void POLICY(double *VF, double *dVF, double *save, double *cons, double *Portfolio, double A[size_asset], double COH[size_asset], double Omega[size_portfoliochoice + 1], double wagerate)
 {
@@ -371,9 +335,9 @@ void POLICY(double *VF, double *dVF, double *save, double *cons, double *Portfol
     free(G_VF);
 }
 
-void SIMULATION(double *COH, double *save, double *Portfolio, double *dist, double *capitalout, double A[size_asset])
+void SIMULATION(double *COH, double *Portfolio, double *dist, double *capitalout, double A[size_asset])
 {
-    double *distold, critdist, distverif, weight, omegatemp, currentcoh, correct, weightcoh, saving;
+    double *distold, critdist, distverif, weight, omegatemp, currentcoh, correct,saving,weightcoh;
 
     distold = (double *)calloc((ARL_dim), sizeof(double));
     null(distold, ARL_dim);
@@ -390,6 +354,11 @@ void SIMULATION(double *COH, double *save, double *Portfolio, double *dist, doub
         correct += TZ[z];
     }
 
+    for (z = 0; z < length_z; z++)
+    {
+        TZ[z] = TZ[z]/correct;
+    }
+    
     while (critdist > epsdist && iter < 300)
     {
         copy(dist, distold, ARL_dim);
@@ -413,42 +382,17 @@ void SIMULATION(double *COH, double *save, double *Portfolio, double *dist, doub
                             currentcoh = ((1.0 + r_f + pi) * risk_states[t] * ZR[z] * omegatemp + (1 + r_f) * (1 - omegatemp)) * A[i] + wagerate * laborincome_states[y] * ZY[z];
                             icoh = min((int)(floor(getgrid(currentcoh))), size_asset - 2);
                             weightcoh = (currentcoh - COH[icoh]) / (COH[icoh + 1] - COH[icoh]);
-
-                            if (weightcoh < 0)
-                            {
-                                printf("<0error%1.3f\n", currentcoh);
-                            }
-
-                            if (weightcoh > 1)
-                            {
-                                // printf(">1error=%1.3f\n", weightcoh);
-
-                                weightcoh = 1.0 + (weightcoh - 1.0) / 500;
-                            } // this is a small correction for potential approx in the extrapolation at the top.
-
-                            saving = inter1d(weightcoh, save[index(icoh, y, t)], save[index(icoh + 1, y, t)]);
+                            
+                            saving = inter1d(weightcoh,save[index(icoh, y, t)],save[index(icoh+1, y, t)]);
                             isave = min((int)(floor(getgrid(saving))), size_asset - 2);
                             weight = (saving - A[isave]) / (A[isave + 1] - A[isave]);
-
-                            if (weight < 0)
-                            {
-                                printf("weight<0error\n");
-                            }
-
-                            if (weight > 1)
-                            {
-                                printf("weight>1error=%1.3f\n", weight);
-
-                                weight = 1.0 + (weight - 1.0) / 10;
-                            } // this is a small correction for potential approx in the extrapolation at the top.
-
+                            
                             for (risk_indexnext = 0; risk_indexnext < size_risk; risk_indexnext++)
                             {
                                 for (laborincome_indexnext = 0; laborincome_indexnext < size_laborincome; laborincome_indexnext++)
                                 {
-
-                                    dist[index(isave, laborincome_indexnext, risk_indexnext)] += (1.0 - weight) * TZ[z] / correct * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
-                                    dist[index(min(isave + 1, size_asset - 1), laborincome_indexnext, risk_indexnext)] += (weight)*TZ[z] / correct * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
+                                    dist[index(isave, laborincome_indexnext, risk_indexnext)] += (1.0 - weight) * TZ[z] * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
+                                    dist[index(min(isave + 1, size_asset - 1), laborincome_indexnext, risk_indexnext)] += (weight)*TZ[z] * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
                                 }
                             }
 
@@ -647,10 +591,10 @@ int main()
     POLICY(VF, dVF, save, cons, Portfolio, A, COH, Omega, wagerate);
     printf("Policy Computation Done\n");
     printf("Simulation Computation Start\n");
-    SIMULATION(COH, save, Portfolio, distin, &capital1, A);
+    SIMULATION(COH, Portfolio, distin, &capital1, A);
     printf("Simulation Computation Done\n");
 
-    std::string common = "21noextra_save,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "21noextra,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     // std::string common = "19.csv ";
     std::string filename_dist = ".\\csv\\dist" + common;
     std::string filename_Port = ".\\csv\\Portfolio" + common;

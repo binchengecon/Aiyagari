@@ -45,7 +45,7 @@ const double scale1 = 1.6;
 const double grmin = (Amin / scale1) - 1.0;
 const double exponen = log((Amax / scale1) - grmin) / (size_asset - 1);
 
-const double pi = 0.00;
+const double pi = 0.03;
 const double corr = 1;
 const double r_f = 0.04;
 const double wagerate = 1.0;
@@ -126,7 +126,7 @@ double FOC_Port(double omega, int y, int t, int i, double *G_VF, double A[size_a
         EG_V += TZ[z] * G_V_next;
     }
 
-    EG_V += Uw(A[i]);
+    // EG_V += Uw(A[i]);
     return (EG_V);
 }
 
@@ -619,7 +619,8 @@ int main()
             for (asset_index = 0; asset_index < size_asset; asset_index++)
             {
                 COHtemp = wagerate * laborincome_states[laborincome_index] + (1 + r_f + pi + risk_states[risk_index]) * A[asset_index];
-                VF[index(asset_index, laborincome_index, risk_index)] = U(COHtemp) + Uw(A[asset_index]); // REQUIERE TO BE INCREASING IN A (the case here)
+                // VF[index(asset_index, laborincome_index, risk_index)] = U(COHtemp) + Uw(A[asset_index]); // REQUIERE TO BE INCREASING IN A (the case here)
+                VF[index(asset_index, laborincome_index, risk_index)] = U(COHtemp); // REQUIERE TO BE INCREASING IN A (the case here)
             }
         }
     }
@@ -650,7 +651,7 @@ int main()
     SIMULATION(COH, save, Portfolio, distin, &capital1, A);
     printf("Simulation Computation Done\n");
 
-    std::string common = "21noextra_save,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "21nouti,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     // std::string common = "19.csv ";
     std::string filename_dist = ".\\csv\\dist" + common;
     std::string filename_Port = ".\\csv\\Portfolio" + common;
