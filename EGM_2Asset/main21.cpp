@@ -17,6 +17,7 @@
 #include <sstream>
 #include "txt/Shock_alex.hpp"
 #include "txt/Risk_Labor.hpp"
+#include <omp.h>
 
 const int size_asset = 200; // number of grid points
 const int size_portfoliochoice = 50;
@@ -158,6 +159,9 @@ void POLICY(double *VF, double *dVF, double *save, double *cons, double *Portfol
             -   compute the optimal consumption-saving problem given "asset" and "coh'"
             -------------------------------------------- **/
         // printf("step 1\n");
+#pragma omp parallel for private(y, t, i, EVF_next, dEVF_next, ynext, tnext, threshold_ii)
+
+        // printf("error\n", getchar());
         for (y = 0; y < size_laborincome; y++)
         {
             for (t = 0; t < size_risk; t++)
@@ -190,6 +194,7 @@ void POLICY(double *VF, double *dVF, double *save, double *cons, double *Portfol
             -   Rescale the solution.
             -------------------------------------------- **/
         // printf("step 2\n");
+#pragma omp parallel for private(y, t, i, currentcoh, threshold_ii, tempvf, wV, wS, ii, weight)
 
         for (y = 0; y < size_laborincome; y++)
         {
@@ -255,6 +260,9 @@ void POLICY(double *VF, double *dVF, double *save, double *cons, double *Portfol
             -   given the second sub-period solution VF_tilde, cons, save, solve for the optimal k, risky share.
             ---------------------------------------------------------------------------------------------------------- **/
         CRIT_VF = 0;
+#pragma omp parallel for reduction(max \
+                                   : CRIT_VF) private(y, t, i, max_GVF, w, val_try, Porttemp)
+
         for (y = 0; y < size_laborincome; y++)
         {
             for (t = 0; t < size_risk; t++)
@@ -286,19 +294,6 @@ void POLICY(double *VF, double *dVF, double *save, double *cons, double *Portfol
                     // replace the value (contraction mappin apply)
                     VF[index(i, y, t)] = VF_new[index(i, y, t)];
 
-                } // end i
-
-            } // end t
-        }     // end y
-
-        // printf("step 4\n");
-
-        for (y = 0; y < size_laborincome; y++)
-        {
-            for (t = 0; t < size_risk; t++)
-            {
-                for (i = 0; i < size_asset; i++)
-                {
                     if (i >= 2)
                     {
                         dVF[index(i - 1, y, t)] = nderiv(VF[index(i - 2, y, t)], VF[index(i - 1, y, t)], VF[index(i, y, t)], A[i - 2], A[i - 1], A[i]);
@@ -308,9 +303,32 @@ void POLICY(double *VF, double *dVF, double *save, double *cons, double *Portfol
                     dVF[index(0, y, t)] = (VF[index(1, y, t)] - VF[index(0, y, t)]) / (A[1] - A[0]);
                     // right corner
                     dVF[index(size_asset - 1, y, t)] = (VF[index(size_asset - 1, y, t)] - VF[index(size_asset - 2, y, t)]) / (A[size_asset - 1] - A[size_asset - 2]);
-                }
-            }
-        }
+                } // end i
+
+            } // end t
+        }     // end y
+
+        // printf("step 4\n");
+        // #pragma omp parallel for private(y, t, i)
+        //         for (y = 0; y < size_laborincome; y++)
+        //         {
+        //             for (t = 0; t < size_risk; t++)
+        //             {
+        //                 for (i = 0; i < size_asset; i++)
+        //                 {
+        //                     if (i >= 2)
+        //                     {
+        //                         dVF[index(i - 1, y, t)] = nderiv(VF[index(i - 2, y, t)], VF[index(i - 1, y, t)], VF[index(i, y, t)], A[i - 2], A[i - 1], A[i]);
+        //                     }
+
+        //                     // left corner
+        //                     dVF[index(0, y, t)] = (VF[index(1, y, t)] - VF[index(0, y, t)]) / (A[1] - A[0]);
+        //                     // right corner
+        //                     dVF[index(size_asset - 1, y, t)] = (VF[index(size_asset - 1, y, t)] - VF[index(size_asset - 2, y, t)]) / (A[size_asset - 1] - A[size_asset - 2]);
+        //                 }
+        //             }
+        //         }
+
         iter++;
 
         printf("ITERATION = %d,  CRIT_VF = %20.15f\n", iter, CRIT_VF); // getchar();
@@ -342,21 +360,21 @@ void SIMULATION(double *COH, double *Portfolio, double *dist, double *capitalout
         copy(dist, distold, ARL_dim);
         null(dist, ARL_dim);
 
+#pragma omp parallel for reduction(+:dist[:ARL_dim]) private(y, t, i, omegatemp, temp4, risk_indexnext, laborincome_indexnext,z,currentcoh,isave,weight)
+
         // distribution dynamics
-        for (i = 0; i < size_asset; i++)
+        for (y = 0; y < size_laborincome; y++)
         {
             for (t = 0; t < size_risk; t++)
             {
-                for (y = 0; y < size_laborincome; y++)
+                for (i = 0; i < size_asset; i++)
                 {
                     if (distold[index(i, y, t)] > 0)
                     {
                         // printf("distold[>0]=%1.5f\n", distold[index(i, y, t)]);
                         omegatemp = Portfolio[index(i, y, t)];
 
-                        temp1 = 0;
-                        temp2 = 0;
-                        temp3 = 0;
+
                         temp4 = 0;
                         for (z = 0; z < length_z; z++)
                         {
@@ -384,13 +402,8 @@ void SIMULATION(double *COH, double *Portfolio, double *dist, double *capitalout
                                         printf("mistake: %d %f psinext = %f", isave, weight, currentcoh);
                                         getchar();
                                     }
-                                    // temp1 += (1.0 - weight) * TZ[z] * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
-                                    // temp1 += (weight)*TZ[z] * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
-                                    // temp2 += TZ[z] * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
-                                    // temp3 += TZ[z] * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext];
-                                    temp1 += TZ[z] * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] / temp4;
-                                    // temp2 += risk_trans[t][risk_indexnext];
-                                    // temp3 += laborincome_trans[y][laborincome_indexnext];
+
+
                                     dist[index(isave, laborincome_indexnext, risk_indexnext)] += (1.0 - weight) * TZ[z] / temp4 * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
                                     dist[index(min(isave + 1, size_asset - 1), laborincome_indexnext, risk_indexnext)] += (weight)*TZ[z] / temp4 * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
                                 }
@@ -410,6 +423,7 @@ void SIMULATION(double *COH, double *Portfolio, double *dist, double *capitalout
         // convergence
         critdist = 0.0;
         distverif = 0.0;
+#pragma omp parallel for reduction(+:distverif) reduction(max:critdist) private(asset_index, risk_index, laborincome_index)
 
         for (asset_index = 0; asset_index < size_asset; asset_index++)
         {

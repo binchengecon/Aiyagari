@@ -27,7 +27,7 @@ const double Amax = 500.0;
 const double COHmin = 0.0;
 const double COHmax = 500.0;
 
-const double betapar = 0.75;
+const double betapar = 0.92;
 const double alphapar = 0.36;
 const double deltapar = 0.08;
 const double rhopar = 1.5;
@@ -45,10 +45,10 @@ const double scale1 = 1.6;
 const double grmin = (Amin / scale1) - 1.0;
 const double exponen = log((Amax / scale1) - grmin) / (size_asset - 1);
 
-const double pi = 0.03;
+const double pi = 0.00;
 const double corr = 1;
 const double r_f = 0.04;
-const double wagerate = 1.8;
+const double wagerate = 1.0;
 
 // grid space for value
 #define RL_dim (size_laborincome * size_risk)
@@ -327,12 +327,12 @@ void POLICY(double *VF, double *dVF, double *save, double *cons, double *Portfol
 
 void SIMULATION(double *COH, double *save, double *Portfolio, double *dist, double *capitalout, double A[size_asset])
 {
-    double *distold, critdist, distverif, weight, omegatemp, currentcoh, correct;
+    double *distold, critdist, distverif, weight, omegatemp, currentcoh, correct, weightcoh, saving;
 
     distold = (double *)calloc((ARL_dim), sizeof(double));
     null(distold, ARL_dim);
 
-    int isave, asset_index, risk_index, risk_indexnext, laborincome_index, laborincome_indexnext, iter, y, t, i, z, znext;
+    int isave, icoh, asset_index, risk_index, risk_indexnext, laborincome_index, laborincome_indexnext, iter, y, t, i, z, znext;
 
     critdist = 1.0;
     iter = 0;
@@ -365,70 +365,44 @@ void SIMULATION(double *COH, double *save, double *Portfolio, double *dist, doub
                         for (z = 0; z < length_z; z++)
                         {
                             currentcoh = ((1.0 + r_f + pi) * risk_states[t] * ZR[z] * omegatemp + (1 + r_f) * (1 - omegatemp)) * A[i] + wagerate * laborincome_states[y] * ZY[z];
-                            isave = min((int)(floor(getgrid(currentcoh))), size_asset - 2);
-                            weight = (currentcoh - COH[isave]) / (COH[isave + 1] - COH[isave]);
+                            icoh = min((int)(floor(getgrid(currentcoh))), size_asset - 2);
+                            weightcoh = (currentcoh - COH[icoh]) / (COH[icoh + 1] - COH[icoh]);
 
-                            if (currentcoh < COH[0])
+                            if (weightcoh < 0)
                             {
-                                printf("error <0\n");
+                                printf("<0error%1.3f\n", currentcoh);
                             }
 
-                            if (currentcoh < COH[size_asset - 1])
+                            if (weightcoh > 1)
                             {
-                                isave = min((int)(floor(getgrid(currentcoh))), size_asset - 2);
-                                weight = (currentcoh - COH[isave]) / (COH[isave + 1] - COH[isave]);
+                                // printf(">1error=%1.3f\n", weightcoh);
 
-                                if (weight < 0 || weight > 1)
-                                {
-                                    printf("mistake weight <0: isave= %d, weight = %10.1f, coh= %20.5f\n", isave, weight, currentcoh);
-                                }
+                                weightcoh = 1.0 + (weightcoh - 1.0) / 500;
+                            } // this is a small correction for potential approx in the extrapolation at the top.
 
-                                for (risk_indexnext = 0; risk_indexnext < size_risk; risk_indexnext++)
-                                {
-                                    for (laborincome_indexnext = 0; laborincome_indexnext < size_laborincome; laborincome_indexnext++)
-                                    {
-                                        // for (znext = 0; znext < length_z; z++)
-                                        // {
-                                        //     dist[index(isave, risk_indexnext, laborincome_indexnext)] += (1.0 - weight) * TZ[znext] * risk_trans[risk_index][risk_indexnext] * laborincome_trans[laborincome_index][laborincome_indexnext] * distold[index(asset_index, risk_index, laborincome_index)];
-                                        //     dist[index(min(isave + 1, size_asset - 1), risk_indexnext, laborincome_indexnext)] += (weight)*TZ[znext] * risk_trans[risk_index][risk_indexnext] * laborincome_trans[laborincome_index][laborincome_indexnext] * (distold[index(asset_index, risk_index, laborincome_index)]);
-                                        // }
+                            saving = inter1d(weightcoh, save[index(icoh, y, t)], save[index(icoh + 1, y, t)]);
+                            isave = min((int)(floor(getgrid(saving))), size_asset - 2);
+                            weight = (saving - A[isave]) / (A[isave + 1] - A[isave]);
 
-                                        // dist[index(isave, laborincome_indexnext, risk_indexnext)] += (1.0 - weight) * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
-                                        // dist[index(min(isave + 1, size_asset - 1), laborincome_indexnext, risk_indexnext)] += (weight)*risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * (distold[index(i, y, t)]);
-
-                                        dist[index(isave, laborincome_indexnext, risk_indexnext)] += (1.0 - weight) * TZ[z] / correct * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
-                                        dist[index(min(isave + 1, size_asset - 1), laborincome_indexnext, risk_indexnext)] += (weight)*TZ[z] / correct * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
-                                    }
-                                }
+                            if (weight < 0)
+                            {
+                                printf("weight<0error\n");
                             }
 
-                            if (currentcoh >= COH[size_asset - 1])
+                            if (weight > 1)
                             {
-                                // isave = min((int)(floor(getgrid(currentcoh))), size_asset - 2);
-                                // weight = (currentcoh - COH[isave]) / (COH[isave + 1] - COH[isave]);
+                                printf("weight>1error=%1.3f\n", weight);
 
-                                // if (weight < 0)
-                                // {
-                                //     printf("mistake weight <0: isave= %d, weight = %10.1f, coh= %20.5f\n", isave, weight, currentcoh);
-                                // }
+                                weight = 1.0 + (weight - 1.0) / 10;
+                            } // this is a small correction for potential approx in the extrapolation at the top.
 
-                                // if (weight > 1)
-                                // {
-                                //     printf("mistake weight >1: isave= %d, weight = %10.1f, coh= %20.5f\n", isave, weight, currentcoh);
-                                // }
-
-                                for (risk_indexnext = 0; risk_indexnext < size_risk; risk_indexnext++)
+                            for (risk_indexnext = 0; risk_indexnext < size_risk; risk_indexnext++)
+                            {
+                                for (laborincome_indexnext = 0; laborincome_indexnext < size_laborincome; laborincome_indexnext++)
                                 {
-                                    for (laborincome_indexnext = 0; laborincome_indexnext < size_laborincome; laborincome_indexnext++)
-                                    {
-                                        // for (znext = 0; znext < length_z; z++)
-                                        // {
-                                        //     dist[index(isave, risk_indexnext, laborincome_indexnext)] += (1.0 - weight) * TZ[znext] * risk_trans[risk_index][risk_indexnext] * laborincome_trans[laborincome_index][laborincome_indexnext] * distold[index(asset_index, risk_index, laborincome_index)];
-                                        //     dist[index(min(isave + 1, size_asset - 1), risk_indexnext, laborincome_indexnext)] += (weight)*TZ[znext] * risk_trans[risk_index][risk_indexnext] * laborincome_trans[laborincome_index][laborincome_indexnext] * (distold[index(asset_index, risk_index, laborincome_index)]);
-                                        // }
-                                        weight = 0;
-                                        dist[index(size_asset - 1, laborincome_indexnext, risk_indexnext)] += (1.0 - weight) * TZ[z] / correct * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
-                                    }
+
+                                    dist[index(isave, laborincome_indexnext, risk_indexnext)] += (1.0 - weight) * TZ[z] / correct * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
+                                    dist[index(min(isave + 1, size_asset - 1), laborincome_indexnext, risk_indexnext)] += (weight)*TZ[z] / correct * risk_trans[t][risk_indexnext] * laborincome_trans[y][laborincome_indexnext] * distold[index(i, y, t)];
                                 }
                             }
 
@@ -460,7 +434,7 @@ void SIMULATION(double *COH, double *save, double *Portfolio, double *dist, doub
 
         // if (distverif != 1)
         // {
-        //     // printf("distribution error\n");
+        //     printf("distribution error\n");
         // }
 
         iter++;
@@ -544,11 +518,80 @@ void printcsv(std::string filename, std::string filetype, double *function)
     filecsv.close();
 }
 
+void moment(double *dist, double *Portfolio, double A[size_asset], double *dist_cumu, double *risky_cumu, double *riskfree_cumu, double distcrit)
+{
+    double dist_temp, risky_temp, riskfree_temp, temp, *dist_density, *risky_density, *riskfree_density, risky_ratio, riskfree_ratio,total_ratio;
+    int i, y, t, ii;
+
+    dist_density = (double *)calloc((size_asset), sizeof(double));
+    risky_density = (double *)calloc((size_asset), sizeof(double));
+    riskfree_density = (double *)calloc((size_asset), sizeof(double));
+    null(dist_density, size_asset);
+    null(dist_cumu, size_asset);
+
+    for (i = 0; i < size_asset; i++)
+    {
+
+        dist_temp = 0;
+
+        for (y = 0; y < size_laborincome; y++)
+        {
+            for (t = 0; t < size_risk; t++)
+            {
+                dist_temp += dist[index(i, y, t)];
+            }
+        }
+
+        dist_density[i] = dist_temp;
+
+        for (ii = 0; ii <= i; ii++)
+        {
+            dist_cumu[i] += dist_density[ii];
+        }
+    }
+
+    for (i = 0; i < size_asset; i++)
+    {
+
+        risky_temp = 0;
+        riskfree_temp = 0;
+        for (y = 0; y < size_laborincome; y++)
+        {
+            for (t = 0; t < size_risk; t++)
+            {
+                risky_temp += dist[index(i, y, t)] * A[i] * Portfolio[i, y, t];
+                riskfree_temp += dist[index(i, y, t)] * A[i] * (1 - Portfolio[i, y, t]);
+            }
+        }
+
+        risky_density[i] = risky_temp;
+        riskfree_density[i] = riskfree_temp;
+        for (ii = 0; ii <= i; ii++)
+        {
+            risky_cumu[i] += risky_density[ii];
+        }
+    }
+    // Interpolation of while loop result last 2
+
+    dist_temp = 0;
+    risky_temp = 0;
+    riskfree_temp = 0;
+    i = 0;
+
+    while (dist_cumu[i] < distcrit)
+    {
+        i++;
+    }
+    risky_ratio = (risky_cumu[size_asset - 1] - risky_cumu[i]) / risky_cumu[size_asset - 1];
+    riskfree_ratio = (riskfree_cumu[size_asset - 1] - riskfree_cumu[i]) / riskfree_cumu[size_asset - 1];
+    total_ratio = ((risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]) - (risky_cumu[i] + riskfree_cumu[i])) / (risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]);
+}
+
 int main()
 {
 
-    double *VF, *dVF, *save, *cons, *Portfolio, *COH, *Omega, *A, *distin, *distout; // for decision rules
-    double capital1;                                                                 // for equilibrium
+    double *VF, *dVF, *save, *cons, *Portfolio, *COH, *Omega, *A, *distin, *distout, *risky_cumu, *riskfree_cumu; // for decision rules
+    double capital1;                                                                                              // for equilibrium
 
     std::cout << "Initilization Start\n";
     // Note for users :: please, always use pointers and save your computer's memory ;) == banish all arrays //
@@ -560,6 +603,8 @@ int main()
     COH = (double *)calloc((ARL_dim), sizeof(double)); // value function
     Omega = (double *)calloc((size_portfoliochoice + 1), sizeof(double));
     A = (double *)calloc((size_asset), sizeof(double));
+    risky_cumu = (double *)calloc((size_asset), sizeof(double));
+    riskfree_cumu = (double *)calloc((size_asset), sizeof(double));
     distin = (double *)calloc((ARL_dim), sizeof(double));
     distout = (double *)calloc((ARL_dim), sizeof(double));
 
@@ -630,7 +675,7 @@ int main()
     SIMULATION(COH, save, Portfolio, distin, &capital1, A);
     printf("Simulation Computation Done\n");
 
-    std::string common = "22,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "21noextra_save,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     // std::string common = "19.csv ";
     std::string filename_dist = ".\\csv\\dist" + common;
     std::string filename_Port = ".\\csv\\Portfolio" + common;
