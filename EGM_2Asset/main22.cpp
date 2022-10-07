@@ -17,6 +17,7 @@
 #include <sstream>
 #include "txt/Shock_alex.hpp"
 #include "txt/Risk_Labor.hpp"
+// #include <omp.h>
 
 const int size_asset = 200; // number of grid points
 const int size_portfoliochoice = 50;
@@ -518,16 +519,24 @@ void printcsv(std::string filename, std::string filetype, double *function)
     filecsv.close();
 }
 
-void moment(double *dist, double *Portfolio, double A[size_asset], double *dist_cumu, double *risky_cumu, double *riskfree_cumu, double distcrit)
+void moment(double *dist, double *Portfolio, double A[size_asset], double *total_ratio, double distcrit)
 {
-    double dist_temp, risky_temp, riskfree_temp, temp, *dist_density, *risky_density, *riskfree_density, risky_ratio, riskfree_ratio,total_ratio;
+    double dist_temp, risky_temp, riskfree_temp, temp, *dist_density, *risky_density, *riskfree_density, *dist_cumu, *risky_cumu, *riskfree_cumu, risky_ratio, riskfree_ratio;
     int i, y, t, ii;
 
     dist_density = (double *)calloc((size_asset), sizeof(double));
     risky_density = (double *)calloc((size_asset), sizeof(double));
     riskfree_density = (double *)calloc((size_asset), sizeof(double));
+
+    dist_cumu = (double *)calloc((size_asset), sizeof(double));
+    risky_cumu = (double *)calloc((size_asset), sizeof(double));
+    riskfree_cumu = (double *)calloc((size_asset), sizeof(double));
     null(dist_density, size_asset);
+    null(risky_density, size_asset);
+    null(riskfree_density, size_asset);
     null(dist_cumu, size_asset);
+    null(risky_cumu, size_asset);
+    null(riskfree_cumu, size_asset);
 
     for (i = 0; i < size_asset; i++)
     {
@@ -569,29 +578,47 @@ void moment(double *dist, double *Portfolio, double A[size_asset], double *dist_
         for (ii = 0; ii <= i; ii++)
         {
             risky_cumu[i] += risky_density[ii];
+            riskfree_cumu[i] += riskfree_density[ii];
         }
+        // printf("risky_cumu=%f\n", risky_cumu[i]);
+        // printf("riskfree_cumu=%f\n", riskfree_cumu[i]);
     }
     // Interpolation of while loop result last 2
 
-    dist_temp = 0;
-    risky_temp = 0;
-    riskfree_temp = 0;
     i = 0;
 
     while (dist_cumu[i] < distcrit)
     {
         i++;
     }
+    // printf("%d", i);
+    // printf("top=%2.6f\n", risky_cumu[i] + riskfree_cumu[i]);
+    // printf("down=%2.6f\n", risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]);
+    // printf("top=%2.6f\n", risky_cumu[i]);
+    // printf("down=%2.6f\n", risky_cumu[size_asset - 1]);
+    // printf("top=%2.6f\n", riskfree_cumu[i]);
+    // printf("down=%2.6f\n", riskfree_cumu[size_asset - 1]);
+
     risky_ratio = (risky_cumu[size_asset - 1] - risky_cumu[i]) / risky_cumu[size_asset - 1];
     riskfree_ratio = (riskfree_cumu[size_asset - 1] - riskfree_cumu[i]) / riskfree_cumu[size_asset - 1];
-    total_ratio = ((risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]) - (risky_cumu[i] + riskfree_cumu[i])) / (risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]);
+    *total_ratio = ((risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]) - (risky_cumu[i] + riskfree_cumu[i])) / (risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]);
+    // riskfree_ratio = ((risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]) - (risky_cumu[i] + riskfree_cumu[i])) / (risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]);
+    // printf("ss=%2.6f\n", risky_ratio);
+    // printf("ss=%2.6f\n", riskfree_ratio);
+    // printf("ss1=%2.6f\n", risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1] - risky_cumu[i] - riskfree_cumu[i]);
+    // printf("ss2=%2.6f\n", (risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]) - risky_cumu[i] - riskfree_cumu[i]);
+    // printf("ss3=%2.6f\n", risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]);
+    // printf("ss4=%2.6f\n", ((risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]) - (risky_cumu[i] + riskfree_cumu[i])) / (risky_cumu[size_asset - 1] + riskfree_cumu[size_asset - 1]));
+    printf("ss5=%2.6f\n", *(total_ratio));
+
+    // *ratio = total_ratio;
 }
 
 int main()
 {
 
     double *VF, *dVF, *save, *cons, *Portfolio, *COH, *Omega, *A, *distin, *distout, *risky_cumu, *riskfree_cumu; // for decision rules
-    double capital1;                                                                                              // for equilibrium
+    double capital1, ratio;                                                                                       // for equilibrium
 
     std::cout << "Initilization Start\n";
     // Note for users :: please, always use pointers and save your computer's memory ;) == banish all arrays //
@@ -674,8 +701,9 @@ int main()
     printf("Simulation Computation Start\n");
     SIMULATION(COH, save, Portfolio, distin, &capital1, A);
     printf("Simulation Computation Done\n");
+    moment(distin, Portfolio, A, &ratio, 0.99);
 
-    std::string common = "21noextra_save,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "22,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     // std::string common = "19.csv ";
     std::string filename_dist = ".\\csv\\dist" + common;
     std::string filename_Port = ".\\csv\\Portfolio" + common;
