@@ -704,7 +704,7 @@ int main()
     // riskfreeproductin = tech_riskfree * riskfreecapitalin;
     // totalproductin = riskyproductin + riskfreeproductin;
 
-    totalproductin = 0.87;
+    totalproductin = 0.79;
 
     double critK = 1.0;
     price = getprice(totalproductin);
@@ -733,7 +733,7 @@ int main()
         printf("critK=%1.7f, pricein=%1.7f, priceout=%1.7f, productin=%1.7f,productout=%1.7f\n", critK, pricein, price, totalproductin, totalproductout);
     }
 
-    std::string common = "22fix2.0,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "23,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     // std::string common = "19.csv ";
     std::string filename_dist = ".\\csv\\dist" + common;
     std::string filename_Port = ".\\csv\\Portfolio" + common;
