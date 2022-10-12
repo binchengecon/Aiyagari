@@ -45,7 +45,7 @@ const double scale1 = 1.6;
 const double grmin = (Amin / scale1) - 1.0;
 const double exponen = log((Amax / scale1) - grmin) / (size_asset - 1);
 
-const double pi = 0.03;
+const double pi = 0.00;
 const double corr = 1;
 const double r_f = 0.04;
 const double wagerate = 1.0;

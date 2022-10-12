@@ -46,7 +46,7 @@ const double scale1 = 1.6;
 const double grmin = (Amin / scale1) - 1.0;
 const double exponen = log((Amax / scale1) - grmin) / (size_asset - 1);
 
-const double pi = 0.03;
+const double pi = 0.00;
 const double corr = 1;
 const double r_f = 0.04;
 const double wagerate = 1.0;
@@ -60,8 +60,8 @@ const double wagerate = 1.0;
 #define MUc(x) (pow((x), -rhopar))
 #define inv_MU(u) (pow((u), (-(1.0 / rhopar))))
 #define U(x) (pow((x), (1.0 - rhopar)) / (1.0 - rhopar))
-#define Uw(x) (pow((x + 2.0), (1.0 - rhopar_w)) / (1.0 - rhopar_w))
-#define MUw(x) (pow((x + 2.0), -rhopar_w))
+#define Uw(x) (pow((x + 0.01), (1.0 - rhopar_w)) / (1.0 - rhopar_w))
+#define MUw(x) (pow((x + 0.01), -rhopar_w))
 
 // Grid
 #define inter1d(x1, y1, y2) ((1.0 - (x1)) * (y1) + (x1) * (y2))
@@ -127,7 +127,7 @@ double FOC_Port(double omega, int y, int t, int i, double *G_VF, double A[size_a
         EG_V += TZ[z] * G_V_next;
     }
 
-    EG_V += Uw(A[i]);
+    // EG_V += Uw(A[i]);
     return (EG_V);
 }
 
@@ -538,20 +538,6 @@ void moment(double *dist, double *Portfolio, double A[size_asset], double *total
     null(risky_cumu, size_asset);
     null(riskfree_cumu, size_asset);
 
-    double port_temp = 0;
-    for (i = 0; i < size_asset; i++)
-    {
-        for (y = 0; y < size_laborincome; y++)
-        {
-            for (t = 0; t < size_risk; t++)
-            {
-                port_temp += Portfolio[index(i, y, t)];
-            }
-        }
-    }
-
-    printf("%2.6f\n", port_temp);
-
     for (i = 0; i < size_asset; i++)
     {
 
@@ -578,28 +564,17 @@ void moment(double *dist, double *Portfolio, double A[size_asset], double *total
 
         risky_temp = 0;
         riskfree_temp = 0;
-        double port_temp = 0;
         for (y = 0; y < size_laborincome; y++)
         {
             for (t = 0; t < size_risk; t++)
             {
-                risky_temp += dist[index(i, y, t)] * A[i] * (Portfolio[index(i, y, t)]);
-                riskfree_temp += dist[index(i, y, t)] * A[i] * (1 - Portfolio[index(i, y, t)]);
-                port_temp += Portfolio[index(i, y, t)];
+                risky_temp += dist[index(i, y, t)] * A[i] * Portfolio[i, y, t];
+                riskfree_temp += dist[index(i, y, t)] * A[i] * (1 - Portfolio[i, y, t]);
             }
         }
 
-        if (port_temp == 0)
-        {
-            printf("warning\n");
-        }
-
         risky_density[i] = risky_temp;
-
         riskfree_density[i] = riskfree_temp;
-        printf("riskyasset[%d]=%2.10f\n", i, risky_temp);
-        printf("riskfreeasset[%d]=%2.6f\n", i, riskfree_temp);
-
         for (ii = 0; ii <= i; ii++)
         {
             risky_cumu[i] += risky_density[ii];
@@ -731,7 +706,7 @@ int main()
     printf("Simulation Computation Done\n");
     moment(distin, Portfolio, A, &ratio, 0.99);
 
-    std::string common = "22fix2.0,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
+    std::string common = "22nouti,pi=" + std::to_string(pi) + ",wage=" + std::to_string(wagerate) + ",std_l=" + std::to_string(std_labor) + ",rf=" + std::to_string(r_f) + ",Psize=" + std::to_string(size_portfoliochoice) + ",rho_c=" + std::to_string(rhopar) + ",rho_w=" + std::to_string(rhopar_w) + ",Ksize=" + std::to_string(size_asset) + ",Kmax=" + std::to_string(Amax) + ",relaxVF=" + std::to_string(relaxVF) + ",beta=" + std::to_string(betapar) + ",corr=" + std::to_string(corr) + ",Ssize=" + std::to_string(size_risk) + ".csv ";
     // std::string common = "19.csv ";
     std::string filename_dist = ".\\csv\\dist" + common;
     std::string filename_Port = ".\\csv\\Portfolio" + common;
